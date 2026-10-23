@@ -29,8 +29,10 @@ export function GlowButton({
     velvet: 'from-rose-900/40 via-velvet-950/50 to-pink-900/40',
   };
 
+  const isFullWidth = className?.includes('w-full');
+
   return (
-    <div className="relative inline-block group">
+    <div className={cn("relative group", isFullWidth ? "w-full block" : "inline-block")}>
       {/* Dynamic Animated Glow Aura */}
       {glowEffect && (
         <div
