@@ -1,7 +1,79 @@
+# ==============================================================================
+# Git Ignore Configuration - MATCH@SAHRDAYA
+# ==============================================================================
+
+# Dependencies
 node_modules/
+/.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Next.js & Build Outputs
 .next/
+out/
+build/
+dist/
+
+# Testing & Coverage
 coverage/
-.DS_Store
+*.lcov
+.nyc_output/
+
+# Logs
+logs/
 *.log
-.env*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment files (Keep .env.example tracked)
+.env
+.env*.local
+.env.development
+.env.production
+.env.test
 !.env.example
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# IDE & Editor files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TypeScript & Cache
+*.tsbuildinfo
+.turbo/
+
+# Container & Orchestration local overrides
+docker-compose.override.yml
+
+# AI Agent Specific Files & Rubrics (Keep internal to local development)
+SKILL.md
+*.skill.md
+*.pdf
+.agent/
+.gemini/
+scratch/
