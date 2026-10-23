@@ -1,8 +1,6 @@
 # MATCH@SAHRDAYA — Comprehensive Project Roadmap & Execution Plan
 
-> **Academic Course Component:** Web Technologies Project  
-> **Target Application:** Campus-Exclusive Valentine Matchmaking & Social Discovery Platform  
-> **Target Institution:** Sahrdaya College of Engineering & Technology  
+> **Operational Standard:** Engineered strictly in accordance with `SKILL.md` engineering principles, multi-layer integration requirements, and Web Technologies Project Guidelines.
 
 ---
 
@@ -32,16 +30,38 @@ Per the course guidelines and `SKILL.md` engineering rules:
 | **Frontend** | Next.js with React & Modern CSS | Next.js 15 (App Router), React 19, Tailwind CSS v4, Motion (Framer Motion) | High performance SSR/CSR, fluid animations, campus-themed typography & styling. |
 | **Backend** | NestJS | NestJS v10+ with TypeScript | Robust enterprise module architecture, dependency injection, and clean separation of concerns. |
 | **API** | GraphQL | Apollo Server / NestJS `@nestjs/graphql` | Strongly typed operations, client-specific queries, zero over-fetching, live subscriptions. |
-| **Database** | Relational / Cloud Database | PostgreSQL 16 with Prisma ORM / TypeORM | Relational integrity for user profiles, foreign key constraints for matches/messages, ACID transactions. |
-| **Version Control** | Git + GitHub | Conventional Commits, Feature Branching | Standardized collaboration, clear commit history. |
-| **Containerization** | Docker | Multi-stage Dockerfiles + Docker Compose | Isolated, reproducible development and production builds. |
+| **Data** | Relational / Cloud Database | PostgreSQL 16 with Prisma ORM | Relational integrity for user profiles, foreign key constraints for matches/messages, ACID transactions. |
+| **Project Workflow** | Git/GitHub | Conventional Commits, Feature Branching | Standardized collaboration, clear commit history. |
+| **Delivery** | Docker & Compose | Multi-stage Dockerfiles + Docker Compose | Isolated, reproducible development and production builds. |
 | **CI/CD** | GitHub Actions | Automated linting, type-checking, building, container testing | Continuous quality gate before deployment. |
 | **Orchestration** | Kubernetes / Minikube | Declarative Pods, Services, Ingress, PersistentVolumes | Local cluster verification and scalable delivery. |
 | **Monitoring** | Error & Performance Observability | Sentry (Error Tracking) + Prometheus & Grafana (Metrics) | Real-time health monitoring and traffic observability. |
 
 ---
 
-## 3. Phased Implementation Roadmap
+## 3. Mandatory SKILL.md Development Workflow
+
+Every subsequent task executed on this repository must follow the standard 6-step workflow:
+
+```mermaid
+flowchart LR
+    Step1["1. Understand\n(User outcome & requirements)"] --> Step2["2. Inspect\n(Files, manifests, configs)"]
+    Step2 --> Step3["3. Plan\n(Smallest complete change)"]
+    Step3 --> Step4["4. Implement End-to-End\n(UI ➔ GraphQL ➔ NestJS ➔ DB)"]
+    Step4 --> Step5["5. Verify\n(Lint, type-check, tests, runtime)"]
+    Step5 --> Step6["6. Document & Report\n(Update docs & note gaps)"]
+```
+
+1. **Understand:** Identify the concrete user outcome and relevant functional requirements. Record material assumptions; do not invent requirements.
+2. **Inspect:** Examine affected files, project structure, manifests, configuration, tests, and existing scripts before editing. Preserve working behavior and local conventions.
+3. **Plan:** Choose the smallest complete change and identify affected layers, risks, and verification checks.
+4. **Implement End to End:** Connect the UI, GraphQL API, NestJS services, and database wherever the workflow requires them. **Do not stop at a stub when real integration is expected.**
+5. **Verify:** Run relevant existing lint, type-check, test, build, and/or runtime checks. Investigate failures rather than hiding them.
+6. **Document and Report:** Update affected setup/API/deployment documentation. State what changed, checks actually run and their results, and any remaining gaps.
+
+---
+
+## 4. Phased Implementation Roadmap
 
 ```mermaid
 gantt
@@ -75,21 +95,21 @@ gantt
 
 ### Detailed Milestone Breakdown
 
-#### Phase 1: Repository Hygiene & Foundation (Current Phase)
+#### Phase 1: Repository Hygiene & Foundation (Completed)
 - [x] Extract and document requirements from project guidelines.
 - [x] Clean AI Studio boilerplate (`metadata.json`, HMR hooks, redundant ESLint configs).
 - [x] Establish secure, multi-tier `.env.example`.
 - [x] Configure `.gitignore` to prevent leaking agent instructions and internal PDFs.
 - [x] Create comprehensive architecture document (`docs/ARCHITECTURE.md`).
-- [ ] Create detailed GraphQL API specification (`docs/GRAPHQL_API_SPEC.md`).
-- [ ] Create relational database schema design (`docs/DATABASE_SCHEMA.md`).
-- [ ] Create containerization and Kubernetes deployment guide (`docs/DOCKER_K8S_GUIDE.md`).
-- [ ] Create monitoring, error tracking, and CI/CD guide (`docs/MONITORING_CICD.md`).
-- [ ] Overhaul root `README.md` for professional portfolio standards.
+- [x] Create detailed GraphQL API specification (`docs/GRAPHQL_API_SPEC.md`).
+- [x] Create relational database schema design (`docs/DATABASE_SCHEMA.md`).
+- [x] Create containerization and Kubernetes deployment guide (`docs/DOCKER_K8S_GUIDE.md`).
+- [x] Create monitoring, error tracking, and CI/CD guide (`docs/MONITORING_CICD.md`).
+- [x] Overhaul root `README.md` for professional portfolio standards.
 
 #### Phase 2: NestJS Backend & Database Construction (Pending User Approval)
-- [ ] Scaffold NestJS backend in a clean monorepo or designated service directory (`backend/` or `server/`).
-- [ ] Configure TypeORM or Prisma with PostgreSQL.
+- [ ] Scaffold NestJS backend in designated directory (`backend/`).
+- [ ] Configure Prisma with PostgreSQL database driver.
 - [ ] Define User, Profile, Interest, Match, Conversation, Message, and Report entities.
 - [ ] Implement database migrations and automated seeding for demo campus users.
 - [ ] Implement JWT authentication module with email domain restriction (`@sahrdaya.ac.in`).
@@ -111,7 +131,7 @@ gantt
   - `k8s/backend-deployment.yaml` and `k8s/backend-service.yaml`
   - `k8s/postgres-statefulset.yaml` and `k8s/postgres-pvc.yaml`
   - `k8s/ingress.yaml`
-- [ ] Validate cluster deployment locally on Minikube.
+- [ ] Validate cluster deployment locally on Minikube with health probes (`livenessProbe` / `readinessProbe`).
 
 #### Phase 5: CI/CD & Observability
 - [ ] Implement GitHub Actions workflow (`.github/workflows/ci.yml`):
@@ -134,22 +154,13 @@ gantt
 
 ---
 
-## 4. Risk Analysis & Mitigation
+## 5. SKILL.md Definition of Done Checklist
 
-| Risk | Impact | Likelihood | Mitigation Strategy |
-|---|---|---|---|
-| **Simulated Chat Transition** | High | Medium | Implement fallback polling query if WebSocket subscriptions face network/proxy restrictions. |
-| **Database Migrations in K8s** | Medium | Medium | Use a Kubernetes pre-install Job or container entrypoint script to execute migrations before starting the API server. |
-| **Local Memory Usage (Minikube + Docker)** | Medium | High | Optimize resource requests/limits in Kubernetes manifests (`512Mi` limit per pod). |
-| **College Domain Validation** | Low | Low | Enforce regex validation at both Next.js UI input and NestJS DTO validation pipes. |
+A change or milestone is considered **Done** only when:
 
----
-
-## 5. Definition of Done Checklist
-
-Every phase and deliverable is considered complete only when:
-- [ ] All code conforms to strict TypeScript compiler standards (`noEmitOnError: true`).
-- [ ] No hardcoded secrets, API keys, or credentials exist in the source tree.
-- [ ] Each functional module is verified across the complete chain: UI → GraphQL → NestJS Service → Database.
-- [ ] Every commit follows conventional commits (`feat:`, `fix:`, `chore:`, `docs:`, `test:`).
-- [ ] Automated CI passes without warnings or failures.
+- [ ] **Next.js, NestJS, GraphQL, and Database Integrated:** Core workflows operate across the complete chain without mock data masquerading as backend logic.
+- [ ] **Functional Integrity:** Core features, validation, error states, and server-side access controls work end-to-end.
+- [ ] **Quality Checks Pass:** Linting, TypeScript checks, and test suites pass, or failures and untested areas are explicitly documented.
+- [ ] **DevOps & Infrastructure Ready:** Git/GitHub, Docker, CI/CD, Kubernetes/Minikube, and basic logging/monitoring are configured and verified.
+- [ ] **Documentation Matches Implementation:** Setup, API, and deployment instructions match the code accurately.
+- [ ] **Truthfulness Guarantee:** Never fabricate features, test results, coverage, security claims, screenshots, integrations, or deployment status.
