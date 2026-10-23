@@ -2,16 +2,13 @@
 
 import React from 'react';
 import { motion } from 'motion/react';
-import { Heart, Sparkles, ShieldCheck, Clock, Users, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { DEMO_USERS } from '@/lib/mock-data';
-import { User } from '@/types/match';
+import { Heart, Sparkles, ShieldCheck, Clock, ArrowRight, Lock, GraduationCap } from 'lucide-react';
 
 interface LandingViewProps {
   onStart: () => void;
-  onQuickLogin: (user: User) => void;
 }
 
-export const LandingView: React.FC<LandingViewProps> = ({ onStart, onQuickLogin }) => {
+export const LandingView: React.FC<LandingViewProps> = ({ onStart }) => {
   return (
     <div className="relative overflow-hidden min-h-[calc(100vh-4rem)] flex flex-col justify-between">
       {/* Ambient romantic backdrop elements */}
@@ -29,7 +26,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart, onQuickLogin 
         >
           <span className="flex h-2 w-2 rounded-full bg-rose-500 animate-ping" />
           <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
-          <span>Sahrdaya Valentine Matching Event — Live for Campus Students</span>
+          <span>Find Your Valentine Match — Exclusive to Sahrdaya College</span>
         </motion.div>
 
         {/* Hero Display Typography */}
@@ -62,7 +59,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart, onQuickLogin 
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-14"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-10"
         >
           <button
             id="landing-cta-primary-btn"
@@ -70,49 +67,29 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart, onQuickLogin 
             className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-semibold text-base shadow-lg shadow-rose-500/25 transition-all hover:scale-[1.02] active:scale-98"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Enter With College Email</span>
+            <span>Get Started with College Email</span>
             <ArrowRight className="w-4 h-4 ml-1" />
           </button>
         </motion.div>
 
-        {/* Quick Demo Student Switcher for instant testing */}
+        {/* Sahrdaya College Trust Badges */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="p-4 rounded-2xl bg-white/75 backdrop-blur-md border border-rose-100/90 shadow-sm max-w-xl mx-auto mb-16 text-left"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-14 text-stone-700 text-xs font-medium"
         >
-          <div className="flex items-center justify-between gap-2 mb-2.5 pb-2 border-b border-rose-100">
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-700 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5" />
-              Instant Demo Access (Prototype Phase 1)
-            </span>
-            <span className="text-[11px] text-stone-500">Click to explore as student:</span>
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur-md border border-rose-100 shadow-sm">
+            <GraduationCap className="w-4 h-4 text-rose-500 shrink-0" />
+            <span>Verified <code className="text-rose-600 font-semibold font-mono">@sahrdaya.ac.in</code> only</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {DEMO_USERS.slice(0, 2).map((u) => (
-              <button
-                key={u.id}
-                onClick={() => onQuickLogin(u)}
-                className="flex items-center gap-3 p-2.5 rounded-xl bg-rose-50/60 hover:bg-rose-100/80 border border-rose-200/60 transition-all text-left group"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={u.profile?.avatarUrl}
-                  alt={u.profile?.displayName}
-                  className="w-9 h-9 rounded-full object-cover ring-1 ring-rose-300"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-bold text-stone-800 group-hover:text-rose-700 truncate">
-                    {u.profile?.displayName}
-                  </div>
-                  <div className="text-[11px] text-stone-500 truncate">
-                    Year {u.profile?.year} · {u.profile?.intent}
-                  </div>
-                </div>
-                <ArrowRight className="w-3.5 h-3.5 text-rose-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
-              </button>
-            ))}
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur-md border border-rose-100 shadow-sm">
+            <Lock className="w-4 h-4 text-rose-500 shrink-0" />
+            <span>Privacy Protected &amp; Moderated</span>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur-md border border-rose-100 shadow-sm">
+            <ShieldCheck className="w-4 h-4 text-rose-500 shrink-0" />
+            <span>Campus Exclusive Community</span>
           </div>
         </motion.div>
 
