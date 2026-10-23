@@ -1,20 +1,26 @@
 # MATCH@SAHRDAYA — GraphQL API Specification
 
-> **Backend Technology:** NestJS + Apollo Server (`@nestjs/graphql`)  
-> **API Paradigm:** Code-First GraphQL with TypeGraphQL decorators  
-> **Endpoint:** `POST /graphql` (HTTP), `ws://.../graphql` (Subscriptions)  
+> **Backend Architecture:** NestJS + Apollo Server (`@nestjs/graphql`)  
+> **API Paradigm:** Code-First GraphQL with TypeScript decorators  
+> **Endpoint:** `POST /graphql` (HTTP Operations) & `ws://.../graphql` (Subscriptions)  
+> **Compliance:** Strict adherence to `SKILL.md` thin resolvers, server-side validation, and security mandates.  
 
 ---
 
-## 1. Architecture & Design Principles
+## 1. Architecture & Design Principles (SKILL.md Mandates)
 
-1. **Strict Type Safety:** All GraphQL inputs and types map directly to TypeScript classes using `@nestjs/graphql` decorators.
-2. **Authentication via Bearer Token:** Protected queries and mutations require standard HTTP header:
-   ```http
-   Authorization: Bearer <JWT_ACCESS_TOKEN>
-   ```
-3. **Thin Resolvers, Rich Services:** Resolvers extract current user context (`@CurrentUser()`) and delegate business logic to injectable NestJS services.
-4. **Uniform Error Structure:** GraphQL errors follow standard extensions with machine-readable error codes.
+Per `SKILL.md` engineering requirements:
+
+1. **Workflow-Driven Schema:**
+   - Schema, queries, and mutations are defined strictly around actual user workflows (Authentication, Profile Onboarding, Cupid Matching, Real-time Chat, Moderation).
+2. **Thin Resolvers, Rich Services:**
+   - Resolvers only extract parameters and identity from the execution context (`@CurrentUser()`).
+   - All matchmaking algorithms, similarity scoring, database operations, and side-effects reside entirely in NestJS injectable services.
+3. **Server-Side Validation & Security:**
+   - All untrusted input is validated on the server using `class-validator` and `class-transformer`.
+   - Handling of missing records, duplicate matches, invalid input, permission failures, and dependency errors occurs cleanly without exposing secrets or internal stack traces.
+4. **Server-Side Access Control:**
+   - Authorization is enforced by NestJS `AuthGuard` on every sensitive query and mutation. Hiding UI controls on the frontend does not substitute for server-side authorization.
 
 ---
 
@@ -156,7 +162,7 @@ type AuthPayload {
 }
 
 # ==============================================================================
-# INPUT TYPES
+# INPUT TYPES (Validated with class-validator)
 # ==============================================================================
 
 input LoginInput {
@@ -251,6 +257,11 @@ type Mutation {
   updateProfile(input: UpdateProfileInput!): User!
 
   """
+  Quickly update selected student interests from modal
+  """
+  updateInterests(interestIds: [String!]!): User!
+
+  """
   Toggle preferred matchmaking algorithm mode
   """
   setMatchMode(mode: MatchMode!): User!
@@ -305,84 +316,77 @@ type Subscription {
 
 ---
 
-## 3. Key Query & Mutation Examples
+## 3. Server-Side Input Validation DTOs
 
-### 3.1 Authentication
-```graphql
-mutation StudentLogin($email: String!) {
-  login(input: { email: $email }) {
-    accessToken
-    user {
-      id
-      email
-      profileCompleted
-      profile {
-        displayName
-        year
-        matchMode
-      }
-    }
-  }
-}
-```
-**Variables:**
-```json
-{
-  "email": "arjun@sahrdaya.ac.in"
-}
-```
+All mutations are backed by NestJS DTO classes with `class-validator` annotations:
 
-### 3.2 Execute Matchmaking
-```graphql
-mutation FindValentinePartner($mode: MatchMode) {
-  executeMatch(overrideMode: $mode) {
-    id
-    score
-    sharedInterests
-    conversationId
-    candidateProfile {
-      displayName
-      year
-      bio
-      avatarUrl
-      interests {
-        name
-        emoji
-      }
-    }
-  }
-}
-```
+```typescript
+// backend/src/modules/auth/dto/login.input.ts
+import { InputType, Field } from '@nestjs/graphql';
+import { IsEmail, Matches } from 'class-validator';
 
-### 3.3 Send Real-Time Chat Message
-```graphql
-mutation SendChatMessage($conversationId: ID!, $content: String!) {
-  sendMessage(input: { conversationId: $conversationId, content: $content }) {
-    id
-    content
-    createdAt
-    sender {
-      id
-      profile {
-        displayName
-      }
-    }
-  }
+@InputType()
+export class LoginInput {
+  @Field()
+  @IsEmail({}, { message: 'Must be a valid email format' })
+  @Matches(/^[a-zA-Z0-9._%+-]+@sahrdaya\.ac\.in$/, {
+    message: 'Authentication restricted to @sahrdaya.ac.in college addresses',
+  })
+  email: string;
+}
+
+// backend/src/modules/chat/dto/send-message.input.ts
+import { InputType, Field, ID } from '@nestjs/graphql';
+import { IsUUID, IsNotEmpty, MaxLength } from 'class-validator';
+
+@InputType()
+export class SendMessageInput {
+  @Field(() => ID)
+  @IsUUID('4', { message: 'Invalid conversation identifier' })
+  conversationId: string;
+
+  @Field()
+  @IsNotEmpty({ message: 'Message content cannot be blank' })
+  @MaxLength(2000, { message: 'Message exceeds maximum length of 2000 characters' })
+  content: string;
 }
 ```
 
 ---
 
-## 4. Error Handling & HTTP Status Codes
+## 4. Apollo Server Error Masking & Formatting
 
-NestJS filters transform application exceptions into uniform GraphQL extensions:
+To prevent leaking sensitive internal stack traces or database connection details, Apollo Server formats errors in `backend/src/app.module.ts`:
 
-| Error Code | HTTP Equivalent | Description |
+```typescript
+GraphQLModule.forRoot<ApolloDriverConfig>({
+  driver: ApolloDriver,
+  autoSchemaFile: true,
+  formatError: (formattedError, error: any) => {
+    // Log complete internal error to Winston / Sentry
+    winstonLogger.error('GraphQL Error', { error });
+
+    // Sanitize message for client consumption
+    return {
+      message: formattedError.message,
+      code: formattedError.extensions?.code || 'INTERNAL_SERVER_ERROR',
+      locations: formattedError.locations,
+      path: formattedError.path,
+    };
+  },
+})
+```
+
+---
+
+## 5. Machine-Readable Error Codes
+
+| Error Code | HTTP Status | Trigger Scenario |
 |---|---|---|
-| `UNAUTHENTICATED` | 401 | Missing or expired JWT token |
-| `FORBIDDEN` | 403 | Attempting to access conversation/data belonging to another user |
-| `INVALID_COLLEGE_DOMAIN` | 400 | Provided email does not belong to `@sahrdaya.ac.in` |
-| `PROFILE_INCOMPLETE` | 400 | Matchmaking attempted before profile completion |
-| `NO_ELIGIBLE_MATCHES` | 404 | All candidates already matched, blocked, or unavailable |
-| `USER_BLOCKED` | 403 | Communication attempted with a blocked peer |
-| `VALIDATION_FAILED` | 422 | Input DTO failed validation constraints |
+| `UNAUTHENTICATED` | 401 | Missing, malformed, or expired Bearer token |
+| `FORBIDDEN` | 403 | Attempting to read another student's conversation or private data |
+| `INVALID_COLLEGE_DOMAIN` | 400 | Email does not end with `@sahrdaya.ac.in` |
+| `PROFILE_INCOMPLETE` | 400 | Student attempted to find a match before completing their profile |
+| `NO_ELIGIBLE_MATCHES` | 404 | All candidates currently matched, blocked, or unavailable |
+| `USER_BLOCKED` | 403 | Attempting to message a blocked user |
+| `BAD_USER_INPUT` | 400 | DTO validation failed (e.g. blank message, invalid year) |
