@@ -1,0 +1,6 @@
+{
+  "name": "MATCH@SAHRDAYA",
+  "description": "Valentine-themed campus matching & social platform for Sahrdaya College students with Cupid matchmaking, interest compatibility, and real-time chat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
