@@ -1,6 +1,12 @@
 # MATCH@SAHRDAYA — CI/CD Pipeline, Monitoring & Error Tracking
 
-> **Course Requirement:** Demonstrate a basic CI/CD workflow (GitHub Actions) and monitoring/logging/error tracking (Sentry, Prometheus, Grafana).  
+> **Course Requirement & SKILL.md Standard:** Demonstrate a basic CI/CD workflow (GitHub Actions) and monitoring/logging/error tracking (Sentry, Prometheus, Grafana).  
+
+> [!IMPORTANT]
+> **SKILL.md Integrity Mandates:**
+> - CI/CD must run real checks supported by the repo. A build/test workflow is continuous integration, not continuous deployment unless a deploy step explicitly deploys to an environment.
+> - Never log secrets, passwords, or JWT tokens in logs or metrics.
+> - Do not claim infrastructure or monitoring works without verifying it.
 
 ---
 
