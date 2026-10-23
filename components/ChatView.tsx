@@ -13,8 +13,11 @@ import {
   Calendar,
   MessageCircleHeart,
   Users,
+  CheckCheck,
 } from 'lucide-react';
 import { Conversation, Message, User } from '@/types/match';
+import { BorderBeam } from '@/components/ui/BorderBeam';
+import { ShinyText } from '@/components/ui/ShinyText';
 
 interface ChatViewProps {
   currentUser: User;
@@ -86,18 +89,18 @@ export const ChatView: React.FC<ChatViewProps> = ({
   if (conversations.length === 0) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <div className="w-16 h-16 rounded-3xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-4 border border-rose-100">
+        <div className="w-16 h-16 rounded-3xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-4 border border-rose-100 shadow-sm">
           <MessageCircleHeart className="w-8 h-8" />
         </div>
         <h2 className="font-serif text-2xl font-bold text-stone-900 mb-2">
           No active conversations yet
         </h2>
-        <p className="text-xs text-stone-500 max-w-sm mx-auto mb-6">
+        <p className="text-xs text-stone-500 max-w-sm mx-auto mb-6 leading-relaxed">
           Your matches and conversations will appear here once Cupid pairs you with fellow Sahrdaya students.
         </p>
         <button
           onClick={onBackToDashboard}
-          className="px-6 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-sm transition-all"
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-xs font-semibold shadow-md shadow-rose-500/20 transition-all hover:scale-105 active:scale-95"
         >
           Find a Match
         </button>
@@ -107,22 +110,22 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
   return (
     <div className="max-w-6xl mx-auto px-2 sm:px-6 py-4 sm:py-6 h-[calc(100vh-5rem)]">
-      <div className="h-full bg-white/95 backdrop-blur-md rounded-3xl border border-rose-100 shadow-xl shadow-rose-950/5 flex overflow-hidden">
-        {/* Left Sidebar: Conversation List (Section 35) */}
+      <div className="h-full bg-white/95 backdrop-blur-md rounded-3xl border border-rose-100 shadow-xl shadow-rose-950/5 flex overflow-hidden relative">
+        {/* Left Sidebar: Conversation List */}
         <div
           className={`w-full md:w-80 border-r border-rose-100 flex flex-col shrink-0 ${
             activeConv && 'hidden md:flex'
           }`}
         >
           {/* Header */}
-          <div className="p-4 border-b border-rose-100 flex items-center justify-between">
+          <div className="p-4 border-b border-rose-100 flex items-center justify-between bg-white/80">
             <div className="flex items-center gap-2">
               <MessageCircleHeart className="w-5 h-5 text-rose-500" />
               <h3 className="font-serif text-base font-bold text-stone-900">
                 Matches &amp; Chats
               </h3>
             </div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200/50">
               {conversations.length}
             </span>
           </div>
@@ -137,9 +140,9 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 <button
                   key={conv.id}
                   onClick={() => onSelectConversation(conv.id)}
-                  className={`w-full p-3.5 text-left flex items-center gap-3 transition-colors ${
+                  className={`w-full p-3.5 text-left flex items-center gap-3 transition-all relative ${
                     isSelected
-                      ? 'bg-rose-50/80 border-l-4 border-l-rose-500'
+                      ? 'bg-gradient-to-r from-rose-50 via-rose-50/70 to-pink-50/40 border-l-4 border-l-rose-500'
                       : 'hover:bg-rose-50/40'
                   }`}
                 >
@@ -149,14 +152,14 @@ export const ChatView: React.FC<ChatViewProps> = ({
                       <img
                         src={other.avatarUrl}
                         alt={other.displayName}
-                        className="w-11 h-11 rounded-full object-cover ring-2 ring-rose-200"
+                        className="w-11 h-11 rounded-full object-cover ring-2 ring-rose-200 shadow-xs"
                       />
                     ) : (
-                      <div className="w-11 h-11 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold text-sm">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-rose-200 to-pink-200 text-rose-700 flex items-center justify-center font-bold text-sm shadow-xs">
                         {other.displayName.charAt(0)}
                       </div>
                     )}
-                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white" />
+                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-2xs" />
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -178,8 +181,10 @@ export const ChatView: React.FC<ChatViewProps> = ({
                       {conv.lastMessage?.content || 'Say hello...'}
                     </p>
 
-                    <div className="text-[10px] text-rose-600/90 mt-0.5 font-medium">
-                      Year {other.year} · {other.sharedInterests.slice(0, 2).join(', ')}
+                    <div className="text-[10px] text-rose-600/90 mt-0.5 font-medium flex items-center gap-1 truncate">
+                      <span>Year {other.year}</span>
+                      <span>·</span>
+                      <span className="truncate">{other.sharedInterests.slice(0, 2).join(', ')}</span>
                     </div>
                   </div>
                 </button>
@@ -188,15 +193,15 @@ export const ChatView: React.FC<ChatViewProps> = ({
           </div>
         </div>
 
-        {/* Right Main Panel: Active Conversation Window (Section 34) */}
+        {/* Right Main Panel: Active Conversation Window */}
         {activeConv ? (
           <div className="flex-1 flex flex-col h-full bg-[#fffafb] min-w-0">
             {/* Conversation Header */}
-            <div className="px-4 py-3 bg-white border-b border-rose-100 flex items-center justify-between gap-3 shrink-0">
+            <div className="px-4 py-3 bg-white border-b border-rose-100 flex items-center justify-between gap-3 shrink-0 shadow-2xs relative z-10">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={onBackToDashboard}
-                  className="md:hidden p-1.5 rounded-lg text-stone-500 hover:bg-stone-100"
+                  className="md:hidden p-1.5 rounded-lg text-stone-500 hover:bg-stone-100 transition-colors"
                   aria-label="Back to conversations"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -207,17 +212,18 @@ export const ChatView: React.FC<ChatViewProps> = ({
                   <img
                     src={activeConv.otherUser.avatarUrl}
                     alt={activeConv.otherUser.displayName}
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-rose-200 shrink-0"
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-rose-200 shrink-0 shadow-xs"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-200 to-pink-200 text-rose-700 flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
                     {activeConv.otherUser.displayName.charAt(0)}
                   </div>
                 )}
 
                 <div className="min-w-0">
-                  <h4 className="font-serif text-sm sm:text-base font-bold text-stone-900 truncate">
-                    {activeConv.otherUser.displayName}
+                  <h4 className="font-serif text-sm sm:text-base font-bold text-stone-900 truncate flex items-center gap-1.5">
+                    <span>{activeConv.otherUser.displayName}</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Active on campus" />
                   </h4>
                   <p className="text-[11px] text-stone-500 flex items-center gap-1.5 truncate">
                     <span>Year {activeConv.otherUser.year}</span>
@@ -230,7 +236,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 </div>
               </div>
 
-              {/* Safety Menu (Section 36 & 37) */}
+              {/* Safety Menu */}
               <div className="relative shrink-0">
                 <button
                   id="safety-menu-trigger-btn"
@@ -247,6 +253,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                       initial={{ opacity: 0, scale: 0.95, y: -5 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
                       className="absolute right-0 top-full mt-1 w-44 bg-white rounded-2xl shadow-xl border border-rose-100 p-1.5 z-30"
                     >
                       <button
@@ -257,7 +264,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                             activeConv.otherUser.id
                           );
                         }}
-                        className="w-full px-3 py-2 rounded-xl text-xs font-medium text-stone-700 hover:bg-stone-50 flex items-center gap-2 text-left"
+                        className="w-full px-3 py-2 rounded-xl text-xs font-medium text-stone-700 hover:bg-stone-50 flex items-center gap-2 text-left transition-colors"
                       >
                         <Flag className="w-3.5 h-3.5 text-amber-500" />
                         <span>Report user</span>
@@ -270,7 +277,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
                             activeConv.otherUser.id
                           );
                         }}
-                        className="w-full px-3 py-2 rounded-xl text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2 text-left"
+                        className="w-full px-3 py-2 rounded-xl text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2 text-left transition-colors"
                       >
                         <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
                         <span>Block user</span>
@@ -285,8 +292,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
             <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
               {/* Cupid Introduction Pill */}
               <div className="my-2 text-center">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100/70 text-rose-700 text-[11px] font-semibold">
-                  <Sparkles className="w-3 h-3" />
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-rose-100/70 border border-rose-200/50 text-rose-700 text-[11px] font-semibold shadow-2xs">
+                  <Sparkles className="w-3 h-3 text-amber-500" />
                   <span>Confidential Valentine Match Channel · Sahrdaya Campus</span>
                 </div>
               </div>
@@ -297,70 +304,100 @@ export const ChatView: React.FC<ChatViewProps> = ({
 
                 if (isSystem) {
                   return (
-                    <div key={msg.id} className="text-center my-3">
-                      <span className="inline-block px-3 py-1 rounded-xl bg-white text-stone-500 border border-rose-100 text-[11px] italic shadow-xs">
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-center my-3"
+                    >
+                      <span className="inline-block px-3 py-1 rounded-xl bg-white text-stone-500 border border-rose-100 text-[11px] italic shadow-2xs">
                         {msg.content}
                       </span>
-                    </div>
+                    </motion.div>
                   );
                 }
 
                 return (
-                  <div
+                  <motion.div
                     key={msg.id}
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
                     className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}
                   >
                     <div
-                      className={`max-w-[80%] sm:max-w-md px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs ${
+                      className={`max-w-[80%] sm:max-w-md px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-xs transition-shadow hover:shadow-md ${
                         isMine
-                          ? 'bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-br-xs'
-                          : 'bg-white text-stone-800 border border-rose-100/90 rounded-bl-xs'
+                          ? 'bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 text-white rounded-br-xs shadow-rose-500/15'
+                          : 'bg-white text-stone-800 border border-rose-100/90 rounded-bl-xs shadow-stone-200/50'
                       }`}
                     >
                       {msg.content}
                     </div>
-                    <span className="text-[9px] text-stone-400 mt-1 px-1">
-                      {new Date(msg.createdAt).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
+                    <div
+                      className={`flex items-center gap-1 text-[9px] text-stone-400 mt-1 px-1 ${
+                        isMine ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      <span>
+                        {new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                      {isMine && (
+                        <Heart className="w-2.5 h-2.5 text-rose-400 fill-rose-300 inline" />
+                      )}
+                    </div>
+                  </motion.div>
                 );
               })}
 
-              {/* Typing indicator */}
-              {isPartnerTyping && (
-                <div className="flex items-center gap-1.5 text-stone-400 text-xs py-1 px-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-400 animate-bounce" />
-                  <span className="w-2 h-2 rounded-full bg-rose-400 animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-2 h-2 rounded-full bg-rose-400 animate-bounce [animation-delay:0.4s]" />
-                  <span className="text-[11px] text-stone-400 ml-1">
-                    {activeConv.otherUser.displayName} is typing...
-                  </span>
-                </div>
-              )}
+              {/* Animated Romantic Typing Indicator */}
+              <AnimatePresence>
+                {isPartnerTyping && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2 bg-white/90 backdrop-blur-xs border border-rose-100/80 rounded-2xl px-3.5 py-2 w-fit shadow-xs"
+                  >
+                    <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-400 animate-pulse" />
+                    <div className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:0s]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:0.18s]" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-bounce [animation-delay:0.36s]" />
+                    </div>
+                    <span className="text-[11px] text-stone-500 font-medium ml-0.5">
+                      {activeConv.otherUser.displayName} is typing...
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Icebreaker Suggestions (Section 34) */}
-            <div className="px-4 py-2 bg-white/60 border-t border-rose-100/60 overflow-x-auto flex gap-2 shrink-0">
+            {/* Icebreaker Suggestions */}
+            <div className="px-4 py-2 bg-white/80 border-t border-rose-100/60 overflow-x-auto flex gap-2 shrink-0 no-scrollbar">
               <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider self-center shrink-0">
                 Icebreakers:
               </span>
               {ICEBREAKERS.map((ice, idx) => (
-                <button
+                <motion.button
                   key={idx}
+                  whileHover={{ scale: 1.03, y: -1 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => handleUseIcebreaker(ice)}
-                  className="px-2.5 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-800 text-[11px] font-medium border border-rose-200/60 whitespace-nowrap transition-colors"
+                  className="px-3 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-800 text-[11px] font-medium border border-rose-200/60 whitespace-nowrap transition-colors shadow-2xs"
                 >
                   {ice}
-                </button>
+                </motion.button>
               ))}
             </div>
 
-            {/* Message Composer (Section 34) */}
+            {/* Message Composer */}
             <form
               onSubmit={handleSend}
               className="p-3 sm:p-4 bg-white border-t border-rose-100 flex items-center gap-2.5 shrink-0"
@@ -372,18 +409,20 @@ export const ChatView: React.FC<ChatViewProps> = ({
                 onKeyDown={handleKeyDown}
                 rows={1}
                 placeholder={`Message ${activeConv.otherUser.displayName}... (Press Enter to send)`}
-                className="flex-1 px-4 py-2.5 rounded-2xl bg-stone-50 border border-rose-200/70 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:bg-white resize-none"
+                className="flex-1 px-4 py-2.5 rounded-2xl bg-stone-50 border border-rose-200/70 text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-rose-200 focus:bg-white resize-none transition-all"
               />
 
-              <button
+              <motion.button
                 id="chat-send-btn"
                 type="submit"
                 disabled={!inputText.trim()}
-                className="w-10 h-10 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white flex items-center justify-center shadow-md shadow-rose-500/20 disabled:opacity-40 disabled:pointer-events-none transition-all"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-10 h-10 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white flex items-center justify-center shadow-md shadow-rose-500/20 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
                 aria-label="Send message"
               >
                 <Send className="w-4 h-4" />
-              </button>
+              </motion.button>
             </form>
           </div>
         ) : (
