@@ -1,0 +1,137 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id               String        @id @default(uuid())
+  email            String        @unique
+  profileCompleted Boolean       @default(false)
+  profile          UserProfile?
+  matchesAsA       Match[]       @relation("UserMatchesA")
+  matchesAsB       Match[]       @relation("UserMatchesB")
+  sentMessages     Message[]
+  blockedUsers     UserBlock[]   @relation("UserBlocker")
+  blockedByUsers   UserBlock[]   @relation("UserBlocked")
+  filedReports     UserReport[]  @relation("UserReporter")
+  receivedReports  UserReport[]  @relation("UserReported")
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@map("users")
+}
+
+model UserProfile {
+  id          String         @id @default(uuid())
+  userId      String         @unique
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName String
+  year        Int
+  bio         String?
+  gender      String         @default("PREFER_NOT_TO_SAY")
+  dateOfBirth DateTime?
+  showDob     Boolean        @default(false)
+  intent      String         @default("DATING")
+  matchMode   String         @default("INTERESTS")
+  avatarUrl   String?
+  interests   UserInterest[]
+  updatedAt   DateTime       @updatedAt
+
+  @@map("user_profiles")
+}
+
+model Interest {
+  id       String         @id
+  name     String         @unique
+  emoji    String
+  category String
+  profiles UserInterest[]
+
+  @@map("interests")
+}
+
+model UserInterest {
+  profileId  String
+  interestId String
+  profile    UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  interest   Interest    @relation(fields: [interestId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, interestId])
+  @@map("user_interests")
+}
+
+model Match {
+  id             String        @id @default(uuid())
+  userAId        String
+  userBId        String
+  userA          User          @relation("UserMatchesA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB          User          @relation("UserMatchesB", fields: [userBId], references: [id], onDelete: Cascade)
+  score          Float         @default(0.5)
+  mode           String        @default("INTERESTS")
+  status         String        @default("ACTIVE")
+  conversationId String?       @unique
+  conversation   Conversation?
+  createdAt      DateTime      @default(now())
+
+  @@index([userAId, userBId])
+  @@map("matches")
+}
+
+model Conversation {
+  id             String    @id @default(uuid())
+  matchId        String    @unique
+  match          Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  participantAId String
+  participantBId String
+  unreadCountA   Int       @default(0)
+  unreadCountB   Int       @default(0)
+  messages       Message[]
+  lastMessageAt  DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content        String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt(sort: Desc)])
+  @@map("messages")
+}
+
+model UserBlock {
+  id        String   @id @default(uuid())
+  blockerId String
+  blockedId String
+  blocker   User     @relation("UserBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("UserBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@map("user_blocks")
+}
+
+model UserReport {
+  id         String   @id @default(uuid())
+  reporterId String
+  targetId   String
+  reporter   User     @relation("UserReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  target     User     @relation("UserReported", fields: [targetId], references: [id], onDelete: Cascade)
+  reason     String
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@map("user_reports")
+}
