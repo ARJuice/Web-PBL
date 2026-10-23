@@ -411,3 +411,55 @@ model UserReport {
   createdAt  DateTime     @default(now())
 }
 ```
+
+---
+
+## 4. Migration Strategy, Seeding & Reproducibility (SKILL.md Compliance)
+
+Per `SKILL.md`, local setup must be 100% reproducible from a fresh clone, and all intentional demo/seed data must be clearly labeled:
+
+### 4.1 Schema Migration Lifecycle
+```bash
+# 1. Generate Prisma Client from schema
+npx prisma generate
+
+# 2. Create and execute database migration
+npx prisma migrate dev --name init_match_sahrdaya_tables
+
+# 3. Apply migrations in CI/CD or production container startup
+npx prisma migrate deploy
+```
+
+### 4.2 Labeled Seed Data Strategy (`backend/prisma/seed.ts`)
+Intentional demo students (Arjun, Maya, Akhil, Niya, Kevin, Ananya, Rohan) and standard campus interests are populated via automated seed scripts:
+
+```typescript
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  console.log('🌱 Seeding MATCH@SAHRDAYA database with intentional campus demo records...');
+
+  // 1. Seed Interests Taxonomy
+  // 2. Seed Verified Sahrdaya Demo Accounts
+  // 3. Seed Initial Demo Match & Conversation for demonstration
+
+  console.log('✅ Seeding complete. All demo records clearly marked.');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+```
+
+To execute the seed script on a fresh database:
+```bash
+npx prisma db seed
+```
+
