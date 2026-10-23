@@ -340,7 +340,6 @@ export default function HomePage() {
         }}
         onOpenSettings={() => setSettingsModalOpen(true)}
         onLogout={handleLogout}
-        onSwitchUser={handleSwitchUser}
         onOpenLogin={() => setLoginModalOpen(true)}
       />
 

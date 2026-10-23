@@ -1,9 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Heart, Sparkles, MessageCircleHeart, Flame, User as UserIcon, LogOut, ArrowRightLeft } from 'lucide-react';
+import { Heart, MessageCircleHeart, Flame, LogOut, Settings } from 'lucide-react';
 import { User } from '@/types/match';
-import { DEMO_USERS } from '@/lib/mock-data';
 
 interface NavbarProps {
   currentUser: User | null;
@@ -12,7 +11,6 @@ interface NavbarProps {
   onNavigate: (view: 'landing' | 'dashboard' | 'chat' | 'onboarding') => void;
   onOpenSettings: () => void;
   onLogout: () => void;
-  onSwitchUser: (user: User) => void;
   onOpenLogin: () => void;
 }
 
@@ -23,11 +21,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   onOpenSettings,
   onLogout,
-  onSwitchUser,
   onOpenLogin,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-rose-100 transition-all">
+    <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-rose-100 transition-all">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo & Wordmark */}
         <button
@@ -91,30 +88,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               </nav>
 
-              {/* Multi-User Quick Switcher for Testing (as requested in spec section 46 & 62) */}
-              <div className="hidden lg:flex items-center gap-1.5 bg-white px-2 py-1 rounded-xl border border-stone-200 text-xs">
-                <ArrowRightLeft className="w-3.5 h-3.5 text-stone-400" />
-                <span className="text-stone-400 text-[11px]">Test as:</span>
-                {DEMO_USERS.slice(0, 3).map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => onSwitchUser(u)}
-                    className={`px-2 py-0.5 rounded-lg text-xs font-medium transition-all ${
-                      currentUser.id === u.id
-                        ? 'bg-rose-100 text-rose-800 font-semibold'
-                        : 'text-stone-600 hover:bg-stone-100'
-                    }`}
-                  >
-                    {u.profile?.displayName.split(' ')[0]}
-                  </button>
-                ))}
-              </div>
-
-              {/* Profile Pill & Settings */}
+              {/* Student Profile Pill & Badges */}
               <button
                 id="navbar-profile-settings-btn"
                 onClick={onOpenSettings}
-                className="flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-2xl bg-white border border-rose-200/80 hover:border-rose-300 shadow-sm hover:shadow transition-all group text-left"
+                className="flex items-center gap-2.5 pl-2 pr-3 py-1 rounded-2xl bg-white border border-rose-200/80 hover:border-rose-300 shadow-xs hover:shadow transition-all group text-left"
+                title="Profile & Settings"
               >
                 {currentUser.profile?.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -124,26 +103,38 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className="w-7 h-7 rounded-full object-cover ring-2 ring-rose-200"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-xs">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-100 to-pink-100 text-rose-600 flex items-center justify-center font-bold text-xs ring-1 ring-rose-200">
                     {currentUser.profile?.displayName?.charAt(0) || 'S'}
                   </div>
                 )}
-                <div className="hidden sm:block">
-                  <div className="text-xs font-semibold text-stone-800 group-hover:text-rose-600 transition-colors flex items-center gap-1">
-                    {currentUser.profile?.displayName || 'My Profile'}
+                <div className="hidden sm:flex flex-col">
+                  <div className="text-xs font-semibold text-stone-800 group-hover:text-rose-600 transition-colors flex items-center gap-1.5">
+                    <span>{currentUser.profile?.displayName || 'My Profile'}</span>
                   </div>
-                  <div className="text-[10px] text-stone-500 leading-tight">
+                  <div className="text-[10px] font-medium text-rose-600 leading-none">
                     {currentUser.profile?.year ? `Year ${currentUser.profile.year}` : 'Student'}
                   </div>
                 </div>
               </button>
 
+              {/* Settings Action Button */}
+              <button
+                id="navbar-settings-btn"
+                onClick={onOpenSettings}
+                className="w-8 h-8 rounded-xl bg-stone-100/90 hover:bg-rose-50 text-stone-600 hover:text-rose-600 border border-stone-200/60 hover:border-rose-200 flex items-center justify-center transition-colors"
+                title="Settings"
+                aria-label="Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+
+              {/* Sign Out Action Button */}
               <button
                 id="navbar-logout-btn"
                 onClick={onLogout}
-                className="w-8 h-8 rounded-xl bg-stone-100 hover:bg-rose-100 text-stone-500 hover:text-rose-600 flex items-center justify-center transition-colors"
-                title="Log out"
-                aria-label="Log out"
+                className="w-8 h-8 rounded-xl bg-stone-100/90 hover:bg-rose-50 text-stone-600 hover:text-rose-600 border border-stone-200/60 hover:border-rose-200 flex items-center justify-center transition-colors"
+                title="Sign out"
+                aria-label="Sign out"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -153,10 +144,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 id="navbar-login-btn"
                 onClick={onOpenLogin}
-                className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-medium text-xs sm:text-sm shadow-md shadow-rose-500/25 transition-all hover:scale-[1.02] active:scale-98"
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-medium text-xs sm:text-sm shadow-md shadow-rose-500/25 transition-all hover:scale-[1.02] active:scale-98"
               >
-                <Sparkles className="w-4 h-4" />
-                <span>College Sign In</span>
+                <Heart className="w-4 h-4 fill-white" />
+                <span>Sign In</span>
               </button>
             </div>
           )}
