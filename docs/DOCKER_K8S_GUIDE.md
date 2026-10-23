@@ -190,7 +190,36 @@ metadata:
   name: match-sahrdaya
 ```
 
-### 4.2 Database StatefulSet (`k8s/10-postgres.yaml`)
+### 4.2 Cluster Secrets & ConfigMaps (`k8s/05-secrets.yaml` & `k8s/06-configmap.yaml`)
+*Compliant with SKILL.md: Keeps credentials out of manifests and images.*
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+  namespace: match-sahrdaya
+type: Opaque
+stringData:
+  password: "postgrespassword"
+  jwt-secret: "production-jwt-cluster-secret-key-min-32-chars"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: match-sahrdaya
+data:
+  NODE_ENV: "production"
+  PORT: "4000"
+  DATABASE_NAME: "match_sahrdaya"
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  DATABASE_USER: "postgres"
+  APP_URL: "http://match.sahrdaya.local"
+```
+
+### 4.3 Database StatefulSet (`k8s/10-postgres.yaml`)
 ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
