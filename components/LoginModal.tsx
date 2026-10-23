@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Heart, Mail, X, ArrowRight, ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { BorderBeam } from '@/components/ui/BorderBeam';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -64,6 +65,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
         className="relative w-full max-w-md bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-rose-100 overflow-hidden text-left"
       >
+        <BorderBeam size={160} duration={8} colorFrom="#f43f5e" colorTo="#fbcfe8" />
         {/* Ambient header glow */}
         <div className="absolute -top-16 -right-16 w-36 h-36 bg-rose-200/50 rounded-full blur-2xl pointer-events-none" />
 
