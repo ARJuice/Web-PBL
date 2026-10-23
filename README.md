@@ -192,6 +192,18 @@ Detailed specifications and guides are located in the [`docs/`](docs/) directory
 
 ---
 
+## ⚖️ SKILL.md Engineering Principles & Quality Bar
+
+This repository adheres strictly to the operational instructions and standards defined in `SKILL.md`:
+
+- **Clear Architectural Boundaries:** Next.js (presentation/interaction) ➔ NestJS (business rules/validation/auth) ➔ GraphQL (typed operations) ➔ PostgreSQL (persistence).
+- **Functioning Controls:** Every visible button, modal, form input, and toggle must perform its intended end-to-end action across responsive viewports.
+- **Real Backend Persistence:** Implemented workflows must be backed by live GraphQL operations and database transactions; mock results are never passed off as completed backend logic.
+- **Server-Side Security:** Authorization and email domain restrictions (`@sahrdaya.ac.in`) are strictly validated on the server.
+- **Definition of Done:** A milestone is only complete when integration across UI ➔ GraphQL ➔ NestJS ➔ Database is verified with passing builds and documented status.
+
+---
+
 ## 📊 Academic Assessment Alignment
 
 This project is developed in accordance with the **Web Technologies Project Guidelines**:
