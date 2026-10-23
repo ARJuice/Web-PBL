@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { Settings, X, Calendar, Check, LogOut, Heart } from 'lucide-react';
 import { Gender, Intent, MatchMode, User, UserProfile } from '@/types/match';
 import { ALL_INTERESTS } from '@/lib/mock-data';
+import { BorderBeam } from '@/components/ui/BorderBeam';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -63,8 +64,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-rose-100 max-h-[90vh] overflow-y-auto text-left"
+        className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-rose-100 max-h-[90vh] overflow-y-auto text-left overflow-hidden"
       >
+        <BorderBeam size={180} duration={8} colorFrom="#f43f5e" colorTo="#fbcfe8" />
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 flex items-center justify-center transition-colors"
