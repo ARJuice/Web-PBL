@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { LandingView } from '@/components/LandingView';
 import { LoginModal } from '@/components/LoginModal';
@@ -39,7 +39,6 @@ import {
   blockUser,
   reportUser,
   setCurrentUserId,
-  saveMatches,
 } from '@/lib/storage';
 
 export default function HomePage() {
@@ -110,24 +109,9 @@ export default function HomePage() {
     }
   };
 
-  // Quick switch user for testing (multi-user testing)
-  const handleSwitchUser = (user: User) => {
-    setCurrentUserId(user.id);
-    setCurrentUser(user);
-    setMatches(getStoredMatches());
-    setConversations(getStoredConversations());
-    setMessages(getStoredMessages());
-
-    if (!user.profileCompleted) {
-      setActiveView('onboarding');
-    } else {
-      setActiveView('dashboard');
-    }
-    addToast('info', `Switched active session to ${user.profile?.displayName || user.email}`);
-  };
-
   // Logout
   const handleLogout = () => {
+    setCurrentUserId(null);
     setCurrentUser(null);
     setSettingsModalOpen(false);
     setActiveView('landing');

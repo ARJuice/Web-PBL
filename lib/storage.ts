@@ -42,27 +42,26 @@ export function saveUsers(users: User[]): void {
   localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
 }
 
-export function getCurrentUserId(): string {
-  if (!isClient()) return 'user-arjun';
-  const id = localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
-  if (!id) {
-    localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, 'user-arjun');
-    return 'user-arjun';
-  }
-  return id;
+export function getCurrentUserId(): string | null {
+  if (!isClient()) return null;
+  return localStorage.getItem(STORAGE_KEYS.CURRENT_USER_ID);
 }
 
-export function setCurrentUserId(id: string): void {
+export function setCurrentUserId(id: string | null): void {
   if (!isClient()) return;
-  localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, id);
+  if (id) {
+    localStorage.setItem(STORAGE_KEYS.CURRENT_USER_ID, id);
+  } else {
+    localStorage.removeItem(STORAGE_KEYS.CURRENT_USER_ID);
+  }
 }
 
 export function getCurrentUser(): User | null {
-  const users = getStoredUsers();
   const id = getCurrentUserId();
+  if (!id) return null;
+  const users = getStoredUsers();
   const found = users.find((u) => u.id === id);
-  if (found) return found;
-  return users[0] || null;
+  return found || null;
 }
 
 export function loginWithEmail(email: string): User {
@@ -271,8 +270,9 @@ export function blockUser(userIdToBlock: string): void {
   const currentUserId = getCurrentUserId();
   const updatedMatches = matches.map((m) => {
     if (
-      (m.userAId === currentUserId && m.userBId === userIdToBlock) ||
-      (m.userBId === currentUserId && m.userAId === userIdToBlock)
+      currentUserId &&
+      ((m.userAId === currentUserId && m.userBId === userIdToBlock) ||
+        (m.userBId === currentUserId && m.userAId === userIdToBlock))
     ) {
       return { ...m, status: 'BLOCKED' as const };
     }
