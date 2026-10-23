@@ -3,6 +3,7 @@
 import React from 'react';
 import { Heart, MessageCircleHeart, Flame, LogOut, Settings } from 'lucide-react';
 import { User } from '@/types/match';
+import { ShinyText } from '@/components/ui/ShinyText';
 
 interface NavbarProps {
   currentUser: User | null;
@@ -41,8 +42,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="font-serif text-lg font-bold tracking-tight text-stone-900 group-hover:text-rose-600 transition-colors">
                 MATCH<span className="text-rose-500 font-sans text-sm font-semibold">@SAHRDAYA</span>
               </span>
-              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wider uppercase bg-rose-50 text-rose-600 border border-rose-200">
-                Valentine &apos;26
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider uppercase bg-rose-50 text-rose-600 border border-rose-200">
+                <ShinyText text="Valentine '26" speed={3} className="font-bold" />
               </span>
             </div>
             <p className="text-[11px] text-stone-500 hidden md:block leading-none">
