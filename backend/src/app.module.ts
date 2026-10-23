@@ -5,6 +5,10 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
+import { MatchModule } from './modules/match/match.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { SafetyModule } from './modules/safety/safety.module';
 
 @Module({
   imports: [
@@ -21,6 +25,10 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     PrismaModule,
     AuthModule,
+    UserModule,
+    MatchModule,
+    ChatModule,
+    SafetyModule,
   ],
 })
 export class AppModule {}
