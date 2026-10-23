@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Heart, Sparkles, Check, ArrowRight, ArrowLeft, Calendar, User as UserIcon, Shield, SlidersHorizontal, Flame } from 'lucide-react';
 import { ALL_INTERESTS } from '@/lib/mock-data';
 import { Gender, Intent, Interest, MatchMode, User, UserProfile } from '@/types/match';
+import { SpotlightCard } from '@/components/ui/SpotlightCard';
+import { BorderBeam } from '@/components/ui/BorderBeam';
+import { GlowButton } from '@/components/ui/GlowButton';
 
 interface OnboardingViewProps {
   currentUser: User;
@@ -118,7 +121,12 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-10 border border-rose-100 shadow-xl shadow-rose-900/5 text-left">
+      <SpotlightCard
+        spotlightColor="rgba(244, 63, 94, 0.12)"
+        className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-10 border border-rose-100 shadow-xl shadow-rose-900/5 text-left relative overflow-hidden"
+      >
+        <BorderBeam size={200} duration={10} colorFrom="#f43f5e" colorTo="#fbcfe8" />
+
         {/* Progress Bar & Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between text-xs font-semibold text-rose-600 mb-2">
@@ -470,17 +478,30 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
             <div />
           )}
 
-          <button
-            type="button"
-            id="onboarding-next-btn"
-            onClick={handleNext}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-rose-500/25 transition-all hover:scale-[1.02] active:scale-98"
-          >
-            <span>{step === totalSteps ? 'Complete & Enter Dashboard' : 'Continue'}</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          {step === totalSteps ? (
+            <GlowButton
+              type="button"
+              id="onboarding-next-btn"
+              onClick={handleNext}
+              variant="rose"
+              className="px-6 py-2.5 text-xs sm:text-sm font-semibold flex items-center gap-2 cursor-pointer"
+            >
+              <span>Complete &amp; Enter Dashboard</span>
+              <Sparkles className="w-4 h-4 text-amber-300" />
+            </GlowButton>
+          ) : (
+            <button
+              type="button"
+              id="onboarding-next-btn"
+              onClick={handleNext}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-rose-500/25 transition-all hover:scale-[1.02] active:scale-98 cursor-pointer"
+            >
+              <span>Continue</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </div>
-      </div>
+      </SpotlightCard>
     </div>
   );
 };
