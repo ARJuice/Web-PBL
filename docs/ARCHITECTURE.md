@@ -1,536 +1,271 @@
 # System Architecture — MATCH@SAHRDAYA
 
-> This document describes the full system architecture for the MATCH@SAHRDAYA platform, covering both the current frontend prototype and the planned full-stack implementation.
+> **Source of Truth:** Defined in accordance with `SKILL.md` engineering rules, architectural boundaries, and the Web Technologies Project Guidelines.
 
 ---
 
 ## Table of Contents
 
-- [1. High-Level Overview](#1-high-level-overview)
-- [2. Current Architecture (Frontend Prototype)](#2-current-architecture-frontend-prototype)
-- [3. Target Architecture (Full Stack)](#3-target-architecture-full-stack)
-- [4. Frontend Architecture](#4-frontend-architecture)
-- [5. Backend Architecture](#5-backend-architecture)
-- [6. GraphQL API Layer](#6-graphql-api-layer)
-- [7. Database Layer](#7-database-layer)
-- [8. Authentication & Authorization](#8-authentication--authorization)
-- [9. Infrastructure & Deployment](#9-infrastructure--deployment)
-- [10. Monitoring & Observability](#10-monitoring--observability)
+- [1. Architectural Principles & SKILL.md Mandates](#1-architectural-principles--skillmd-mandates)
+- [2. High-Level System Overview](#2-high-level-system-overview)
+- [3. Current Prototype vs Target Full-Stack Architecture](#3-current-prototype-vs-target-full-stack-architecture)
+- [4. Architectural Boundaries & Responsibility Separation](#4-architectural-boundaries--responsibility-separation)
+- [5. Frontend Architecture (Next.js 15)](#5-frontend-architecture-nextjs-15)
+- [6. Backend Architecture (NestJS)](#6-backend-architecture-nestjs)
+- [7. GraphQL API Gateway](#7-graphql-api-gateway)
+- [8. Persistence & Data Access (PostgreSQL & Prisma)](#8-persistence--data-access-postgresql--prisma)
+- [9. Authentication & Server-Side Authorization](#9-authentication--server-side-authorization)
+- [10. Containerization & Orchestration (Docker & Minikube)](#10-containerization--orchestration-docker--minikube)
+- [11. Observability, Logging & Error Tracking](#11-observability-logging--error-tracking)
 
 ---
 
-## 1. High-Level Overview
+## 1. Architectural Principles & SKILL.md Mandates
 
-MATCH@SAHRDAYA is a campus-only social matching platform built for Sahrdaya College of Engineering & Technology. The system matches students based on shared interests and enables real-time communication between matched pairs.
+Per the engineering rules defined in `SKILL.md`, the architecture adheres to four non-negotiable tenets:
+
+1. **Strict Architectural Boundaries:**
+   - **Next.js** handles presentation, responsive UI, routing, and user interaction.
+   - **NestJS** owns all business rules, input validation, authentication/authorization, and persistence orchestration.
+   - **GraphQL** exposes strongly-typed operations (queries, mutations, subscriptions).
+   - **Database Access** remains strictly behind backend services and data-access code; the frontend never interacts directly with the database.
+2. **Every Visible Control Must Function:**
+   - Every visible button, modal, form input, and toggle must perform its intended end-to-end action.
+   - The UI must implement explicit loading skeletons, empty states, success states, validation errors, and network failure states.
+3. **Real API-Backed Data (No Fake Mock Claims):**
+   - Implemented workflows must be backed by live GraphQL operations and database persistence.
+   - Seed data (such as demo campus profiles) must be clearly labeled as such in database seeders; client-side mocks must not masquerade as completed backend functionality.
+4. **Server-Side Security Enforcement:**
+   - Hiding UI controls or buttons does not constitute authorization. All security permissions, token verifications, and resource access checks must be strictly enforced on the server.
+
+---
+
+## 2. High-Level System Overview
 
 ```mermaid
 graph TB
-    subgraph "Client Layer"
-        Browser["Browser / PWA"]
+    subgraph "Client Layer (Next.js 15 App Router)"
+        Browser["Desktop & Mobile Browsers"]
+        ApolloClient["Apollo Client / GraphQL Cache"]
+        ReactUI["React 19 Components (Tailwind v4 + Motion)"]
     end
 
-    subgraph "Frontend - Next.js"
-        SSR["Server-Side Rendering"]
-        CSR["Client Components"]
-        GQLClient["GraphQL Client"]
+    subgraph "API Gateway Layer (NestJS)"
+        GQLGateway["GraphQL Endpoint (/graphql)"]
+        AuthGuard["JWT AuthGuard & Domain Validator"]
+        ValidationPipe["Global ValidationPipe (class-validator)"]
+        ExceptionFilter["Global SentryExceptionFilter"]
     end
 
-    subgraph "API Layer"
-        GQL["GraphQL API Gateway"]
+    subgraph "Core Business Logic (NestJS Services)"
+        AuthService["AuthService\n(College Domain & JWT)"]
+        UserService["UserService\n(Profiles & Interests)"]
+        MatchService["MatchmakingService\n(Cupid & Serendipity)"]
+        ChatService["ChatService\n(Messaging & Threads)"]
+        ReportService["SafetyService\n(Blocks & Reports)"]
     end
 
-    subgraph "Backend - NestJS"
-        AuthModule["Auth Module"]
-        UserModule["User Module"]
-        MatchModule["Match Module"]
-        ChatModule["Chat Module"]
-        NotifModule["Notification Module"]
+    subgraph "Persistence Layer (PostgreSQL 16)"
+        PrismaORM["Prisma ORM / Query Builder"]
+        PostgresDB[(PostgreSQL Database)]
+        RedisCache[(Redis Cache / PubSub)]
     end
 
-    subgraph "Data Layer"
-        DB["PostgreSQL"]
-        Cache["Redis (Optional)"]
+    subgraph "Infrastructure & Delivery"
+        DockerEnv["Docker Containers (Multi-stage)"]
+        MinikubeK8s["Kubernetes / Minikube Pods"]
+        GithubActions["GitHub Actions CI/CD"]
     end
 
-    subgraph "Infrastructure"
-        Docker["Docker Containers"]
-        K8s["Kubernetes / Minikube"]
-        CICD["GitHub Actions CI/CD"]
+    subgraph "Observability"
+        SentryMonitoring["Sentry Error Tracking"]
+        PromMetrics["Prometheus Exporter (/metrics)"]
+        GrafanaDash["Grafana Observability Dashboard"]
     end
 
-    subgraph "Monitoring"
-        Sentry["Sentry / Error Tracking"]
-        Metrics["Prometheus + Grafana"]
-        Logs["Structured Logging"]
-    end
-
-    Browser --> SSR
-    Browser --> CSR
-    CSR --> GQLClient
-    GQLClient --> GQL
-    GQL --> AuthModule
-    GQL --> UserModule
-    GQL --> MatchModule
-    GQL --> ChatModule
-    GQL --> NotifModule
-    AuthModule --> DB
-    UserModule --> DB
-    MatchModule --> DB
-    ChatModule --> DB
-    ChatModule --> Cache
-    Docker --> K8s
-    NestJS --> Sentry
-    NestJS --> Metrics
-    NestJS --> Logs
+    Browser --> ReactUI
+    ReactUI --> ApolloClient
+    ApolloClient -->|GraphQL Queries / Mutations| GQLGateway
+    GQLGateway --> AuthGuard
+    AuthGuard --> ValidationPipe
+    ValidationPipe --> ExceptionFilter
+    ExceptionFilter --> AuthService & UserService & MatchService & ChatService & ReportService
+    AuthService & UserService & MatchService & ChatService & ReportService --> PrismaORM
+    PrismaORM --> PostgresDB
+    ChatService --> RedisCache
+    DockerEnv --> MinikubeK8s
+    GQLGateway --> SentryMonitoring
+    GQLGateway --> PromMetrics
+    PromMetrics --> GrafanaDash
 ```
 
 ---
 
-## 2. Current Architecture (Frontend Prototype)
+## 3. Current Prototype vs Target Full-Stack Architecture
 
-The current implementation is a **single-page application** exported from Google AI Studio. All logic runs client-side with localStorage for persistence.
+### 3.1 Prototype State (As Exported from Google AI Studio)
+The exported prototype is a standalone client-side Next.js application:
+- **State:** Managed entirely inside a single god component (`app/page.tsx`, ~460 lines).
+- **Persistence:** LocalStorage keys (`match_sahrdaya_*`) storing JSON blobs.
+- **Matchmaking:** Client-side JavaScript iteration over hardcoded mock data (`lib/mock-data.ts`).
+- **Chat:** Client-side `setTimeout` simulating replies from matched demo candidates.
+- **Security:** No authentication token, no password hashing, client-only route branching.
 
-```mermaid
-graph LR
-    subgraph "Browser"
-        Page["page.tsx (God Component)"]
-        Components["React Components"]
-        Storage["lib/storage.ts"]
-        MockData["lib/mock-data.ts"]
-        LS["localStorage"]
-    end
-
-    Page --> Components
-    Page --> Storage
-    Storage --> MockData
-    Storage --> LS
-```
-
-### Current Limitations
-
-| Area | Limitation |
-|------|-----------|
-| **State Management** | Single god component (`page.tsx`) holds all state — ~460 lines |
-| **Data Persistence** | localStorage only — no server, no database |
-| **Authentication** | Email-only, no password, no token verification |
-| **Matchmaking** | Client-side algorithm — easy to manipulate |
-| **Chat** | Simulated auto-replies with `setTimeout` — not real-time |
-| **Multi-user** | "Switch user" feature for testing, not real sessions |
-| **Routing** | State-based view switching, not URL-based routing |
+### 3.2 Target Full-Stack Architecture (SKILL.md Compliance)
+- **Frontend:** Modular Next.js 15 client querying GraphQL via Apollo Client, handling presentation, form validation, and reactive UI states.
+- **Backend:** NestJS monolithic server structured into cohesive modules (`AuthModule`, `UserModule`, `MatchModule`, `ChatModule`, `SafetyModule`).
+- **Data:** PostgreSQL 16 relational database with strict constraints (FKs, unique pairs, cascades) accessed exclusively via Prisma ORM.
+- **Live Events:** GraphQL Subscriptions over WebSockets for live chat messages, typing indicators, and instant match celebration notifications.
 
 ---
 
-## 3. Target Architecture (Full Stack)
-
-```mermaid
-graph TB
-    subgraph "Client Tier"
-        NextJS["Next.js 15 (App Router)"]
-        Apollo["Apollo Client / urql"]
-    end
-
-    subgraph "API Tier"
-        NestGQL["NestJS + GraphQL"]
-        Guards["Auth Guards"]
-        Pipes["Validation Pipes"]
-    end
-
-    subgraph "Service Tier"
-        AuthSvc["AuthService"]
-        UserSvc["UserService"]
-        MatchSvc["MatchService"]
-        ChatSvc["ChatService"]
-        NotifSvc["NotificationService"]
-    end
-
-    subgraph "Data Tier"
-        PG["PostgreSQL"]
-        TypeORM["TypeORM / Prisma"]
-    end
-
-    NextJS --> Apollo
-    Apollo --> NestGQL
-    NestGQL --> Guards
-    NestGQL --> Pipes
-    Guards --> AuthSvc
-    NestGQL --> UserSvc
-    NestGQL --> MatchSvc
-    NestGQL --> ChatSvc
-    NestGQL --> NotifSvc
-    AuthSvc --> TypeORM
-    UserSvc --> TypeORM
-    MatchSvc --> TypeORM
-    ChatSvc --> TypeORM
-    TypeORM --> PG
-```
-
----
-
-## 4. Frontend Architecture
-
-### Directory Structure (Planned)
-
-```
-app/
-├── (auth)/
-│   ├── login/page.tsx
-│   └── register/page.tsx
-├── (main)/
-│   ├── dashboard/page.tsx
-│   ├── chat/
-│   │   ├── page.tsx
-│   │   └── [conversationId]/page.tsx
-│   ├── match/page.tsx
-│   ├── profile/page.tsx
-│   └── settings/page.tsx
-├── layout.tsx
-├── page.tsx              # Landing page
-└── globals.css
-
-components/
-├── features/
-│   ├── auth/             # Login, Register components
-│   ├── chat/             # Chat UI components
-│   ├── dashboard/        # Dashboard widgets
-│   ├── matching/         # Matching flow components
-│   ├── onboarding/       # Profile setup wizard
-│   └── profile/          # Profile display/edit
-├── layout/
-│   ├── Navbar.tsx
-│   ├── Footer.tsx
-│   └── Sidebar.tsx
-├── shared/
-│   ├── Toast.tsx
-│   ├── Modal.tsx
-│   └── LoadingSpinner.tsx
-└── ui/
-    ├── Button.tsx
-    ├── Input.tsx
-    ├── Card.tsx
-    └── CupidEmblem.tsx
-```
-
-### State Management Strategy
-
-| Concern | Solution |
-|---------|----------|
-| Server state (users, matches, messages) | Apollo Client cache / React Query |
-| Auth state | React Context + JWT token |
-| UI state (modals, toasts) | React `useState` / Zustand |
-| Form state | React Hook Form |
-| URL state | Next.js App Router |
-
-### Routing Plan
-
-| Route | Component | Auth Required |
-|-------|-----------|:---:|
-| `/` | Landing page | ❌ |
-| `/login` | Login form | ❌ |
-| `/register` | Registration | ❌ |
-| `/onboarding` | Profile setup wizard | ✅ |
-| `/dashboard` | Main dashboard | ✅ |
-| `/match` | Matching screen | ✅ |
-| `/chat` | Conversation list | ✅ |
-| `/chat/[id]` | Chat thread | ✅ |
-| `/profile` | User profile | ✅ |
-| `/settings` | Settings | ✅ |
-
----
-
-## 5. Backend Architecture
-
-### NestJS Module Structure
-
-```mermaid
-graph TB
-    subgraph "NestJS Application"
-        AppModule["AppModule"]
-        
-        subgraph "Core Modules"
-            AuthModule["AuthModule"]
-            UserModule["UserModule"]
-            MatchModule["MatchModule"]
-            ChatModule["ChatModule"]
-        end
-
-        subgraph "Shared"
-            DatabaseModule["DatabaseModule"]
-            ConfigModule["ConfigModule"]
-            LoggingModule["LoggingModule"]
-        end
-    end
-
-    AppModule --> AuthModule
-    AppModule --> UserModule
-    AppModule --> MatchModule
-    AppModule --> ChatModule
-    AppModule --> DatabaseModule
-    AppModule --> ConfigModule
-    AppModule --> LoggingModule
-
-    AuthModule --> DatabaseModule
-    UserModule --> DatabaseModule
-    MatchModule --> DatabaseModule
-    ChatModule --> DatabaseModule
-```
-
-### Module Responsibilities
-
-| Module | Responsibility |
-|--------|---------------|
-| **AuthModule** | JWT auth, login/register, guards, password hashing |
-| **UserModule** | Profile CRUD, interest management, avatar uploads |
-| **MatchModule** | Matchmaking algorithm, match history, block/report |
-| **ChatModule** | Message CRUD, conversation management, typing indicators |
-| **DatabaseModule** | TypeORM/Prisma connection, migrations |
-| **ConfigModule** | Environment variable validation and access |
-| **LoggingModule** | Structured logging, request tracking |
-
----
-
-## 6. GraphQL API Layer
-
-### Schema Overview
-
-See [`docs/API.md`](./API.md) for the complete GraphQL schema specification.
-
-```graphql
-# Key Types
-type User { ... }
-type Match { ... }
-type Conversation { ... }
-type Message { ... }
-
-# Key Operations
-type Query {
-  me: User!
-  myMatches: [Match!]!
-  myConversations: [Conversation!]!
-  messages(conversationId: ID!): [Message!]!
-}
-
-type Mutation {
-  login(input: LoginInput!): AuthPayload!
-  register(input: RegisterInput!): AuthPayload!
-  updateProfile(input: UpdateProfileInput!): User!
-  findMatch: Match
-  sendMessage(input: SendMessageInput!): Message!
-  blockUser(userId: ID!): Boolean!
-  reportUser(input: ReportInput!): Boolean!
-}
-```
-
----
-
-## 7. Database Layer
-
-See [`docs/DATABASE.md`](./DATABASE.md) for the complete schema design.
-
-### Entity Relationship Diagram
-
-```mermaid
-erDiagram
-    USER ||--o{ USER_INTEREST : has
-    USER ||--o{ MATCH : "participates in"
-    MATCH ||--|| CONVERSATION : creates
-    CONVERSATION ||--o{ MESSAGE : contains
-    USER ||--o{ MESSAGE : sends
-    USER ||--o{ REPORT : "files/receives"
-    USER ||--o{ BLOCK : "blocks/is blocked"
-    INTEREST ||--o{ USER_INTEREST : "selected by"
-
-    USER {
-        uuid id PK
-        varchar email UK
-        varchar password_hash
-        varchar display_name
-        int year
-        text bio
-        varchar gender
-        date date_of_birth
-        boolean show_dob
-        varchar intent
-        varchar match_mode
-        varchar avatar_url
-        boolean profile_completed
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    INTEREST {
-        varchar id PK
-        varchar name
-        varchar emoji
-        varchar category
-    }
-
-    USER_INTEREST {
-        uuid user_id FK
-        varchar interest_id FK
-    }
-
-    MATCH {
-        uuid id PK
-        uuid user_a_id FK
-        uuid user_b_id FK
-        float score
-        varchar mode
-        varchar status
-        uuid conversation_id FK
-        timestamp created_at
-    }
-
-    CONVERSATION {
-        uuid id PK
-        uuid match_id FK
-        int unread_count_a
-        int unread_count_b
-        timestamp created_at
-    }
-
-    MESSAGE {
-        uuid id PK
-        uuid conversation_id FK
-        uuid sender_id FK
-        text content
-        timestamp created_at
-    }
-
-    BLOCK {
-        uuid id PK
-        uuid blocker_id FK
-        uuid blocked_id FK
-        timestamp created_at
-    }
-
-    REPORT {
-        uuid id PK
-        uuid reporter_id FK
-        uuid target_id FK
-        varchar reason
-        text note
-        timestamp created_at
-    }
-```
-
----
-
-## 8. Authentication & Authorization
-
-### Auth Flow
+## 4. Architectural Boundaries & Responsibility Separation
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant N as Next.js
-    participant A as NestJS Auth
-    participant DB as Database
+    autonumber
+    participant UI as Next.js Presentation Layer
+    participant GQL as GraphQL Resolvers
+    participant Svc as NestJS Business Services
+    participant DB as PostgreSQL Persistence Layer
 
-    C->>N: Login form submit
-    N->>A: POST /graphql (login mutation)
-    A->>DB: Verify credentials
-    DB-->>A: User record
-    A->>A: Generate JWT
-    A-->>N: { accessToken, user }
-    N->>N: Store token (httpOnly cookie)
-    N-->>C: Redirect to dashboard
-
-    Note over C,N: Subsequent requests
-    C->>N: Request protected page
-    N->>A: GraphQL query (Authorization: Bearer token)
-    A->>A: Validate JWT (AuthGuard)
-    A->>DB: Fetch data
-    DB-->>A: Data
-    A-->>N: Response
-    N-->>C: Rendered page
+    Note over UI,DB: Example: Executing Cupid Matchmaking
+    UI->>GQL: mutation ExecuteMatch { executeMatch(mode: INTERESTS) { ... } }
+    GQL->>GQL: AuthGuard: Verify JWT Bearer token
+    GQL->>Svc: MatchService.executeMatch(currentUserId, mode)
+    Svc->>DB: Query candidate pool excluding self, blocked peers, & active matches
+    DB-->>Svc: Candidate profiles & interest lists
+    Svc->>Svc: Calculate Jaccard similarity & weighted compatibility score
+    Svc->>DB: INSERT into matches & INSERT into conversations (Atomic Transaction)
+    DB-->>Svc: Created Match & Conversation records
+    Svc-->>GQL: Match result DTO
+    GQL-->>UI: Typed GraphQL response
+    UI->>UI: Trigger confetti celebration & render MatchResultModal
 ```
-
-### Security Measures
-
-- **Password hashing:** bcrypt with salt rounds
-- **JWT tokens:** Short-lived access tokens (15min), refresh tokens (7d)
-- **CORS:** Restricted to frontend origin
-- **Rate limiting:** Login attempts throttled
-- **Input validation:** class-validator on all DTOs
-- **SQL injection:** Parameterized queries via ORM
-- **XSS:** React's built-in escaping + CSP headers
 
 ---
 
-## 9. Infrastructure & Deployment
+## 5. Frontend Architecture (Next.js 15)
 
-### Docker Architecture
+### 5.1 Component Structure & State Separation
+To eliminate the `app/page.tsx` god-component anti-pattern, components are organized by domain feature:
 
-```mermaid
-graph TB
-    subgraph "Docker Compose (Development)"
-        FE["frontend\n(Next.js)\nPort 3000"]
-        BE["backend\n(NestJS)\nPort 4000"]
-        DB["postgres\nPort 5432"]
-        PG["pgadmin\nPort 5050"]
-    end
-
-    FE --> BE
-    BE --> DB
-    PG --> DB
 ```
+app/
+├── layout.tsx                  # Root layout with fonts & theme tokens
+├── page.tsx                    # Landing page view
+├── dashboard/page.tsx          # Authenticated dashboard (matches, stats, quick action)
+├── matching/page.tsx           # 10-second animated matchmaking suspense screen
+├── chat/
+│   ├── page.tsx                # Conversations directory
+│   └── [id]/page.tsx           # Active message thread
+└── onboarding/page.tsx         # Multi-step profile configuration wizard
 
-### Kubernetes Architecture
-
-```mermaid
-graph TB
-    subgraph "Minikube Cluster"
-        subgraph "Ingress"
-            ING["Nginx Ingress\nController"]
-        end
-
-        subgraph "Frontend Pod"
-            FE1["Next.js Container"]
-        end
-
-        subgraph "Backend Pod"
-            BE1["NestJS Container"]
-        end
-
-        subgraph "Database"
-            PG1["PostgreSQL\nStatefulSet"]
-            PVC["PersistentVolumeClaim"]
-        end
-
-        subgraph "Monitoring"
-            PROM["Prometheus"]
-            GRAF["Grafana"]
-        end
-
-        ING --> FE1
-        ING --> BE1
-        BE1 --> PG1
-        PG1 --> PVC
-        PROM --> BE1
-        GRAF --> PROM
-    end
+components/
+├── features/
+│   ├── auth/LoginModal.tsx
+│   ├── onboarding/OnboardingWizard.tsx
+│   ├── dashboard/DashboardOverview.tsx
+│   ├── matching/MatchingScreen.tsx
+│   ├── matching/MatchResultModal.tsx
+│   ├── chat/ChatView.tsx
+│   ├── chat/MessageThread.tsx
+│   └── safety/SafetyModals.tsx
+├── layout/
+│   ├── Navbar.tsx
+│   └── Footer.tsx
+└── ui/
+    ├── CupidEmblem.tsx
+    ├── Toast.tsx
+    └── ShinyText.tsx
 ```
-
-See [`docs/DEPLOYMENT.md`](./DEPLOYMENT.md) for detailed deployment instructions.
 
 ---
 
-## 10. Monitoring & Observability
+## 6. Backend Architecture (NestJS)
 
-| Layer | Tool | Purpose |
-|-------|------|---------|
-| Error tracking | Sentry | Capture and alert on runtime errors |
-| Metrics | Prometheus | Collect application and system metrics |
-| Dashboards | Grafana | Visualize metrics and set up alerts |
-| Logging | Winston/Pino | Structured JSON logging |
-| Health checks | NestJS Terminus | `/health` endpoint for K8s probes |
+### 6.1 Module Organization
+NestJS encapsulates functionality into self-contained modules following Dependency Injection:
 
-### Key Metrics to Track
+```
+backend/src/
+├── app.module.ts               # Root module importing feature & core modules
+├── main.ts                     # Bootstrap entrypoint (port 4000, CORS, Swagger/GQL)
+├── core/
+│   ├── config/                 # Environment validation via Joi / Nest Config
+│   ├── database/               # PrismaClientModule & database lifecycle
+│   ├── guards/                 # JwtAuthGuard, DomainVerificationGuard
+│   ├── filters/                # Global SentryExceptionFilter
+│   └── interceptors/           # LoggingInterceptor (request duration & tracing)
+└── modules/
+    ├── auth/                   # Login, college domain validation, JWT minting
+    ├── user/                   # Profile CRUD, interests registry, avatar handling
+    ├── match/                  # Cupid matching algorithm & serendipity engine
+    ├── chat/                   # Conversation threads, message pagination, subscriptions
+    └── safety/                 # Blocklist registry & conduct reporting
+```
 
-- Request latency (p50, p95, p99)
-- Error rate by endpoint
-- Active users count
-- Match success rate
-- Message throughput
-- Database connection pool usage
-- Memory and CPU utilization
+### 6.2 Thin Resolvers & Rich Services
+Resolvers strictly extract incoming DTOs and user context, passing execution to business services:
+
+```typescript
+@Resolver(() => Match)
+export class MatchResolver {
+  constructor(private readonly matchService: MatchService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => Match)
+  async executeMatch(
+    @CurrentUser() user: AuthenticatedUser,
+    @Args('mode', { nullable: true }) mode?: MatchMode,
+  ): Promise<Match> {
+    return this.matchService.executeMatch(user.id, mode);
+  }
+}
+```
+
+---
+
+## 7. GraphQL API Gateway
+
+- **Schema Approach:** Code-First with `@nestjs/graphql` and `@nestjs/apollo`.
+- **Validation:** Server-side input validation on every mutation argument via `ValidationPipe` with `transform: true` and `whitelist: true`.
+- **Data Protection:** Sanitization of database error messages to prevent internal stack traces from leaking to client responses.
+
+---
+
+## 8. Persistence & Data Access (PostgreSQL & Prisma)
+
+- **PostgreSQL 16:** Enforces relational integrity, foreign key constraints (`ON DELETE CASCADE`), and custom PostgreSQL `ENUM` types.
+- **Indexes:**
+  - Compound indexes on `(user_a_id, user_b_id)` for duplicate match prevention.
+  - Sorted chronological index on `(conversation_id, created_at DESC)` for sub-millisecond chat loading.
+- **Transactions:** Atomic transactions (`prisma.$transaction`) ensure a match record and its associated conversation are committed simultaneously.
+
+---
+
+## 9. Authentication & Server-Side Authorization
+
+- **Domain Restriction:** College emails must match the regular expression `^[a-zA-Z0-9._%+-]+@sahrdaya\.ac\.in$`.
+- **JWT Authorization:**
+  - Access tokens (expires in 15m) passed in `Authorization: Bearer <token>`.
+  - Refresh tokens (expires in 7d) stored securely in HttpOnly cookies.
+- **Resource Ownership Verification:** A user can only fetch conversations and send messages in threads where their `user_id` matches one of the two registered participants.
+
+---
+
+## 10. Containerization & Orchestration (Docker & Minikube)
+
+- **Multi-Stage Builds:** Next.js `standalone` mode compiles minimal runtime artifacts without `node_modules` overhead.
+- **Docker Compose:** Spans Frontend (3000), Backend (4000), PostgreSQL (5432), and Redis (6379) with healthcheck dependencies.
+- **Kubernetes (Minikube):**
+  - Declarative manifests for pods, services, ingress, and persistent volumes.
+  - Configured with `readinessProbe` and `livenessProbe` to satisfy SKILL.md delivery guidelines.
+
+---
+
+## 11. Observability, Logging & Error Tracking
+
+- **Sentry Integration:** Captures unhandled client errors, hydration failures, and 5xx backend server exceptions.
+- **Prometheus Metrics:** Exposes system and domain metrics on `/metrics` (request duration histograms, total matches created, active chat sockets).
+- **Structured JSON Logging:** Winston logger outputting timestamped, level-tagged JSON without logging credentials or private student data.
