@@ -42,7 +42,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
   const [displayName, setDisplayName] = useState(existing?.displayName || currentUser.email.split('@')[0]);
   const [year, setYear] = useState<number>(existing?.year || 2);
   const [bio, setBio] = useState(
-    existing?.bio || 'Sahrdaya student passionate about learning, good music, and good company.'
+    existing?.bio || 'Student passionate about learning, good music, and good company.'
   );
   const [gender, setGender] = useState<Gender>(existing?.gender || 'PREFER_NOT_TO_SAY');
   const [dateOfBirth, setDateOfBirth] = useState(existing?.dateOfBirth || '2004-02-14');
@@ -132,7 +132,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
           <div className="flex items-center justify-between text-xs font-semibold text-rose-600 mb-2">
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
-              Sahrdaya Profile Setup
+              Profile Setup
             </span>
             <span>Step {step} of {totalSteps}</span>
           </div>
@@ -159,7 +159,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
                   Introduce yourself to campus
                 </h2>
                 <p className="text-xs sm:text-sm text-stone-500">
-                  This is how you will appear to fellow Sahrdaya students.
+                  This is how you will appear to fellow students.
                 </p>
               </div>
 
@@ -346,7 +346,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
                   Select your interests
                 </h2>
                 <p className="text-xs sm:text-sm text-stone-500">
-                  Cupid uses these to pair you with high-compatibility peers at Sahrdaya ({selectedInterests.length} selected).
+                  Cupid uses these to pair you with high-compatibility peers ({selectedInterests.length} selected).
                 </p>
               </div>
 

@@ -1,4 +1,4 @@
-# 💌 MATCH@SAHRDAYA
+# 💌 MATCH@ALL
 
 <div align="center">
 
@@ -11,7 +11,7 @@
 ![Docker](https://img.shields.io/badge/Containers-Docker-2496ED?style=for-the-badge&logo=docker)
 ![Kubernetes](https://img.shields.io/badge/Orchestration-Kubernetes-326CE5?style=for-the-badge&logo=kubernetes)
 
-**A campus-exclusive, Valentine-themed social discovery and matchmaking web platform designed specifically for students of Sahrdaya College of Engineering & Technology.**
+**A Valentine-themed social discovery and matchmaking web platform open to students everywhere.**
 
 [Explore Architecture](docs/ARCHITECTURE.md) • [Project Roadmap](docs/PROJECT_PLAN.md) • [GraphQL API Spec](docs/GRAPHQL_API_SPEC.md) • [Database Schema](docs/DATABASE_SCHEMA.md) • [Docker & K8s Guide](docs/DOCKER_K8S_GUIDE.md)
 
@@ -21,12 +21,12 @@
 
 ## 📖 Overview
 
-**MATCH@SAHRDAYA** addresses the common disconnect between academic departments and college years by providing a fun, season-bounded social matching experience during Valentine's week.
+**MATCH@ALL** addresses the common disconnect between academic departments and college years by providing a fun, season-bounded social matching experience during Valentine's week.
 
 Built as an academic project for the **Web Technologies** curriculum, the platform couples an engaging, highly responsive frontend with an enterprise-grade backend following industry best practices.
 
 ### 🌟 Key Highlights
-- **Campus-Only Trust Network:** College email identity domain restriction (`@sahrdaya.ac.in`).
+- **Verified Email Trust Network:** Simple, verified email identity sign-in with no domain restrictions.
 - **Dual Matchmaking Engines:**
   - 🏹 **Cupid Match (Interest Compatibility):** Multi-attribute weighted algorithm scoring shared hobbies, intents, and college year.
   - 🎲 **Serendipity Match (Random):** Discover unexpected connections across campus branches.
@@ -135,7 +135,7 @@ Web-PBL/
 ├── hooks/                      # Custom React Hooks (mobile detection, layout)
 ├── lib/                        # Utilities, algorithms, and local stores
 │   ├── confetti.ts             # Canvas confetti animation wrapper
-│   ├── mock-data.ts            # Sahrdaya student profiles, interests, campus picks
+│   ├── mock-data.ts            # Demo student profiles, interests, campus picks
 │   ├── storage.ts              # LocalStorage persistence & matchmaking scoring logic
 │   └── utils.ts                # Tailwind class merge helper (clsx + twMerge)
 ├── types/                      # TypeScript domain model definitions
@@ -199,7 +199,7 @@ This repository adheres strictly to the operational instructions and standards d
 - **Clear Architectural Boundaries:** Next.js (presentation/interaction) ➔ NestJS (business rules/validation/auth) ➔ GraphQL (typed operations) ➔ PostgreSQL (persistence).
 - **Functioning Controls:** Every visible button, modal, form input, and toggle must perform its intended end-to-end action across responsive viewports.
 - **Real Backend Persistence:** Implemented workflows must be backed by live GraphQL operations and database transactions; mock results are never passed off as completed backend logic.
-- **Server-Side Security:** Authorization and email domain restrictions (`@sahrdaya.ac.in`) are strictly validated on the server.
+- **Server-Side Security:** Authorization and identity validation are strictly enforced on the server.
 - **Definition of Done:** A milestone is only complete when integration across UI ➔ GraphQL ➔ NestJS ➔ Database is verified with passing builds and documented status.
 
 ---

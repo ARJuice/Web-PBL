@@ -205,7 +205,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <span className="font-bold text-rose-600">
                     <CountUpNumber value={142} duration={2} />+
                   </span>{' '}
-                  Sahrdaya students paired across CS, Biotech, ECE &amp; Civil.
+                  students paired across CS, Biotech, ECE &amp; Civil.
                 </div>
               </div>
             </div>

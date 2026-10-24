@@ -10,13 +10,13 @@ import {
 } from '@/types/match';
 
 const STORAGE_KEYS = {
-  CURRENT_USER_ID: 'match_sahrdaya_current_user_id',
-  USERS: 'match_sahrdaya_users_v1',
-  MATCHES: 'match_sahrdaya_matches_v1',
-  CONVERSATIONS: 'match_sahrdaya_conversations_v1',
-  MESSAGES: 'match_sahrdaya_messages_v1',
-  BLOCKED_IDS: 'match_sahrdaya_blocked_ids_v1',
-  REPORTS: 'match_sahrdaya_reports_v1',
+  CURRENT_USER_ID: 'match_all_current_user_id',
+  USERS: 'match_all_users_v1',
+  MATCHES: 'match_all_matches_v1',
+  CONVERSATIONS: 'match_all_conversations_v1',
+  MESSAGES: 'match_all_messages_v1',
+  BLOCKED_IDS: 'match_all_blocked_ids_v1',
+  REPORTS: 'match_all_reports_v1',
 };
 
 function isClient(): boolean {
@@ -70,7 +70,6 @@ export function loginWithEmail(email: string): User {
   let user = users.find((u) => u.email.toLowerCase() === normalized);
 
   if (!user) {
-    const isCollegeDomain = normalized.endsWith('@sahrdaya.ac.in');
     const localPart = normalized.split('@')[0] || 'student';
     const cleanName = localPart
       .split(/[._-]/)
@@ -82,19 +81,17 @@ export function loginWithEmail(email: string): User {
       email: normalized,
       profileCompleted: false,
       createdAt: new Date().toISOString(),
-      profile: isCollegeDomain
-        ? {
-            displayName: cleanName,
-            year: 1,
-            bio: 'Sahrdaya student ready to meet great people.',
-            gender: 'PREFER_NOT_TO_SAY',
-            showDob: false,
-            intent: 'DATING',
-            matchMode: 'INTERESTS',
-            interests: [ALL_INTERESTS[0], ALL_INTERESTS[1]],
-            avatarUrl: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80`,
-          }
-        : undefined,
+      profile: {
+        displayName: cleanName,
+        year: 1,
+        bio: 'Ready to meet great people.',
+        gender: 'PREFER_NOT_TO_SAY',
+        showDob: false,
+        intent: 'DATING',
+        matchMode: 'INTERESTS',
+        interests: [ALL_INTERESTS[0], ALL_INTERESTS[1]],
+        avatarUrl: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80`,
+      },
     };
     users.push(user);
     saveUsers(users);
@@ -110,7 +107,7 @@ export function upsertProfile(userId: string, profile: UserProfile): User {
   if (index === -1) {
     const newUser: User = {
       id: userId,
-      email: `${userId}@sahrdaya.ac.in`,
+      email: `${userId}@matchall.app`,
       profileCompleted: true,
       createdAt: new Date().toISOString(),
       profile,
@@ -178,7 +175,7 @@ function getInitialMessages(): Record<string, Message[]> {
         id: 'msg-init-1',
         conversationId: 'conv-arjun-maya',
         senderId: 'user-arjun',
-        content: 'Hi Maya! Cupid brought us together on MATCH@SAHRDAYA 😊',
+        content: 'Hi Maya! Cupid brought us together on MATCH@ALL 😊',
         createdAt: new Date(Date.now() - 3600 * 1000 * 3).toISOString(),
       },
       {
@@ -520,7 +517,7 @@ export function triggerSimulatedMatchReply(
   onReply: (replyMsg: Message) => void
 ): () => void {
   const romanticReplies = [
-    `Hey! I'm so glad we got matched on MATCH@SAHRDAYA! How is your semester going?`,
+    `Hey! I'm so glad we got matched on MATCH@ALL! How is your semester going?`,
     `Haha that's sweet! Are you free to grab a coffee at the campus canteen sometime this week? ☕`,
     `I totally agree! By the way, what kind of songs have been on your repeat playlist lately? 🎶`,
     `Cupid definitely had good taste matching us! What branch are you in?`,

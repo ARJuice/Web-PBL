@@ -25,7 +25,7 @@ export const MatchingScreen: React.FC<MatchingScreenProps> = ({
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const statusMessages = [
-    'Scanning active Sahrdaya campus profiles...',
+    'Scanning active campus profiles...',
     'Filtering department, year, and mutual intents...',
     'Scoring Cupid interest compatibility matrix...',
     'Found a high-resonance campus peer...',
@@ -98,7 +98,7 @@ export const MatchingScreen: React.FC<MatchingScreenProps> = ({
         <div className="flex items-center gap-2">
           <CupidEmblem size={28} glow={false} />
           <span className="font-serif font-bold tracking-wider uppercase text-[11px] text-rose-100">
-            MATCH@SAHRDAYA
+            MATCH@ALL
           </span>
         </div>
         <div className="px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] font-semibold text-rose-200 backdrop-blur-md">
@@ -145,7 +145,7 @@ export const MatchingScreen: React.FC<MatchingScreenProps> = ({
           </div>
 
           <p className="text-xs text-rose-200/70 max-w-xs mx-auto">
-            Looking through verified Sahrdaya profiles to calculate the sweetest connection.
+            Looking through verified student profiles to calculate the sweetest connection.
           </p>
         </div>
 
@@ -205,7 +205,7 @@ export const MatchingScreen: React.FC<MatchingScreenProps> = ({
 
       {/* Bottom note */}
       <div className="text-center text-[11px] text-rose-300/60 py-2 relative z-10 font-mono">
-        Cupid algorithms active • Sahrdaya College of Engineering &amp; Technology
+        Cupid algorithms active • MATCH@ALL Campus Edition
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 {
-  "name": "match-at-sahrdaya",
+  "name": "match-at-all",
   "version": "0.1.0",
-  "description": "Valentine-themed campus matchmaking and social interaction web application for Sahrdaya College",
+  "description": "Valentine-themed campus matchmaking and social interaction web application",
   "private": true,
   "scripts": {
     "dev": "next dev",

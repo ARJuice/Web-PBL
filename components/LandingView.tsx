@@ -35,7 +35,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart }) => {
           <BorderBeam size={100} duration={6} colorFrom="#f43f5e" colorTo="#fbbf24" />
           <span className="flex h-2 w-2 rounded-full bg-rose-500 animate-ping" />
           <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
-          <span>Find Your Valentine Match — Exclusive to Sahrdaya College</span>
+          <span>Find Your Valentine Match</span>
         </motion.div>
 
         {/* Hero Display Typography */}
@@ -47,7 +47,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart }) => {
         >
           Meet someone worth talking to at{' '}
           <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-rose-600 via-pink-600 to-rose-500">
-            Sahrdaya
+            Anywhere
             <span className="absolute left-0 -bottom-1 w-full h-[3px] bg-gradient-to-r from-rose-400 to-pink-400 rounded-full" />
           </span>
         </motion.h1>
@@ -59,8 +59,8 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart }) => {
           transition={{ delay: 0.2 }}
           className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto mb-8 font-normal leading-relaxed"
         >
-          A temporary, Sahrdaya-college-only social matching experience for Valentine’s season.
-          Select your passions, choose your matching mode, and let Cupid introduce you to eligible peers across departments.
+          A Valentine-season social matching experience.
+          Select your passions, choose your matching mode, and let Cupid introduce you to eligible peers everywhere.
         </motion.p>
 
         {/* Primary Glow CTA Button */}
@@ -77,12 +77,12 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart }) => {
             className="px-8 py-4 text-base font-semibold"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Get Started with College Email</span>
+            <span>Get Started with Your Email</span>
             <ArrowRight className="w-4 h-4 ml-1" />
           </GlowButton>
         </motion.div>
 
-        {/* Sahrdaya College Trust Badges */}
+        {/* Verified Email Trust Badges */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -91,7 +91,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart }) => {
         >
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur-md border border-rose-100 shadow-sm hover:border-rose-300 transition-colors">
             <GraduationCap className="w-4 h-4 text-rose-500 shrink-0" />
-            <span>Verified <code className="text-rose-600 font-semibold font-mono">@sahrdaya.ac.in</code> only</span>
+            <span>Verified email only</span>
           </div>
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/90 backdrop-blur-md border border-rose-100 shadow-sm hover:border-rose-300 transition-colors">
             <Lock className="w-4 h-4 text-rose-500 shrink-0" />
@@ -145,7 +145,7 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart }) => {
                 Campus Privacy &amp; Safety
               </h3>
               <p className="text-xs text-stone-600 leading-relaxed">
-                Restricted strictly to @sahrdaya.ac.in emails. Built-in instant block, report, and discreet DOB visibility controls.
+                Restricted to verified email sign-in. Built-in instant block, report, and discreet DOB visibility controls.
               </p>
             </SpotlightCard>
           </TiltCard>
@@ -156,9 +156,9 @@ export const LandingView: React.FC<LandingViewProps> = ({ onStart }) => {
       <footer className="border-t border-rose-100 bg-white/60 backdrop-blur-sm py-6 text-center text-xs text-stone-500 relative z-10">
         <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-serif font-bold text-stone-800">MATCH@SAHRDAYA</span>
+            <span className="font-serif font-bold text-stone-800">MATCH@ALL</span>
             <span className="text-stone-300">·</span>
-            <span>Sahrdaya College of Engineering and Technology</span>
+            <span>Meet someone worth talking to</span>
           </div>
           <div className="flex items-center gap-3 text-stone-400">
             <span>Confidential &amp; Student Moderated</span>

@@ -15,17 +15,17 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'MATCH@SAHRDAYA — Meet someone worth talking to',
-  description: 'A temporary, Sahrdaya-college-only social matching platform designed around the Valentine\'s Day period.',
+  title: 'MATCH@ALL — Meet someone worth talking to',
+  description: 'A Valentine-season social matching platform — meet someone worth talking to, anywhere.',
   openGraph: {
-    title: 'MATCH@SAHRDAYA — Meet someone worth talking to',
-    description: 'A temporary, Sahrdaya-college-only social matching platform designed around the Valentine\'s Day period.',
+    title: 'MATCH@ALL — Meet someone worth talking to',
+    description: 'A Valentine-season social matching platform — meet someone worth talking to, anywhere.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MATCH@SAHRDAYA — Meet someone worth talking to',
-    description: 'A temporary, Sahrdaya-college-only social matching platform designed around the Valentine\'s Day period.',
+    title: 'MATCH@ALL — Meet someone worth talking to',
+    description: 'A Valentine-season social matching platform — meet someone worth talking to, anywhere.',
   },
 };
 

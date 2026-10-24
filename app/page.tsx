@@ -102,7 +102,7 @@ export default function HomePage() {
 
     if (!user.profileCompleted) {
       setActiveView('onboarding');
-      addToast('info', 'Welcome to Sahrdaya Valentine Matching! Please set up your profile.');
+      addToast('info', 'Welcome to MATCH@ALL Valentine Matching! Please set up your profile.');
     } else {
       setActiveView('dashboard');
       addToast('cupid', `Welcome back, ${user.profile?.displayName || 'Student'}!`);

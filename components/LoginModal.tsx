@@ -24,24 +24,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   const clean = email.trim().toLowerCase();
   const hasAt = clean.includes('@');
-  const isValidCollegeDomain = clean.endsWith('@sahrdaya.ac.in');
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!clean) {
-      setError('Please enter your official Sahrdaya institutional email address');
+      setError('Please enter your email address');
       return;
     }
 
-    if (!clean.includes('@')) {
+    if (!isValidEmail) {
       setError('Please enter a valid email address');
-      return;
-    }
-
-    // College domain validation
-    if (!isValidCollegeDomain) {
-      setError('MATCH@SAHRDAYA is restricted to students with @sahrdaya.ac.in emails');
       return;
     }
 
@@ -86,18 +80,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           <div>
             <div className="flex items-center gap-1.5">
               <h2 className="font-serif text-xl font-bold text-stone-900">
-                MATCH<span className="text-rose-500 font-sans text-sm font-semibold">@SAHRDAYA</span>
+                MATCH<span className="text-rose-500 font-sans text-sm font-semibold">@ALL</span>
               </h2>
               <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold tracking-wider uppercase bg-rose-50 text-rose-600 border border-rose-200">
                 Campus Portal
               </span>
             </div>
-            <p className="text-xs text-stone-500">Sahrdaya College of Engineering &amp; Technology</p>
+            <p className="text-xs text-stone-500">Meet someone worth talking to</p>
           </div>
         </div>
 
         <p className="text-xs text-stone-600 mb-6 leading-relaxed">
-          Welcome to the Sahrdaya Valentine Matching platform. Enter your official Sahrdaya institutional email address to sign in or get started.
+          Welcome to the MATCH@ALL Valentine Matching platform. Enter your email address to sign in or get started.
         </p>
 
         {/* Login Form */}
@@ -119,12 +113,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   setEmail(e.target.value);
                   if (error) setError('');
                 }}
-                placeholder="student@sahrdaya.ac.in"
+                placeholder="you@college.edu"
                 disabled={isSubmitting}
                 className={`w-full pl-10 pr-4 py-3 rounded-xl border bg-stone-50/60 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:bg-white transition-all disabled:opacity-60 ${
                   error
                     ? 'border-red-300 focus:ring-red-200'
-                    : isValidCollegeDomain
+                    : isValidEmail
                     ? 'border-emerald-300 focus:ring-emerald-200'
                     : 'border-rose-200/80 focus:ring-rose-200 focus:border-rose-400'
                 }`}
@@ -139,20 +133,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{error}</span>
                 </p>
-              ) : isValidCollegeDomain ? (
+              ) : isValidEmail ? (
                 <p className="text-emerald-600 font-medium flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
-                  <span>Verified Sahrdaya College domain</span>
+                  <span>Verified email address</span>
                 </p>
               ) : hasAt ? (
                 <p className="text-amber-600 font-medium flex items-center gap-1.5">
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  <span>Domain must be <code className="font-mono font-semibold">@sahrdaya.ac.in</code></span>
+                  <span>Add the domain after the @ (e.g. college.edu)</span>
                 </p>
               ) : (
                 <p className="text-stone-500 flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                  <span>Enter your official Sahrdaya institutional email address</span>
+                  <span>Enter your email address to sign in or get started</span>
                 </p>
               )}
             </div>
@@ -167,7 +161,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin text-white" />
-                <span>Authenticating with Sahrdaya...</span>
+                <span>Authenticating...</span>
               </>
             ) : (
               <>
@@ -184,7 +178,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <ShieldCheck className="w-3.5 h-3.5 text-rose-500 shrink-0" />
             <span>Encrypted &amp; Student Moderated</span>
           </div>
-          <span className="text-stone-400 font-medium">Sahrdaya CET</span>
+          <span className="text-stone-400 font-medium">MATCH@ALL</span>
         </div>
       </motion.div>
     </div>

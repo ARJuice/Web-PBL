@@ -72,7 +72,7 @@ export const EditInterestsModal: React.FC<EditInterestsModalProps> = ({
 
         <div className="flex items-center gap-2 text-xs font-semibold text-rose-600 mb-1">
           <Sparkles className="w-4 h-4" />
-          <span>MATCH@SAHRDAYA PREFERENCES</span>
+          <span>MATCH@ALL PREFERENCES</span>
         </div>
 
         <h3 className="font-serif text-xl font-bold text-stone-900 mb-1">

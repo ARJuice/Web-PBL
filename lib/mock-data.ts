@@ -30,7 +30,7 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     description: 'A handcrafted edible bouquet wrapped in vintage blush parchment & red satin ribbon.',
     price: '₹799',
     imageUrl: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=600&auto=format&fit=crop&q=80',
-    affiliateUrl: 'https://sahrdaya.ac.in/valentine-picks/chocolate-bouquet',
+    affiliateUrl: 'https://matchall.app/valentine-picks/chocolate-bouquet',
     tag: "Valentine's Campus Pick",
   },
   {
@@ -39,7 +39,7 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     description: 'Capture every fingerprint together forever in non-toxic plaster. Includes bronze gilding paint.',
     price: '₹1,249',
     imageUrl: 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&auto=format&fit=crop&q=80',
-    affiliateUrl: 'https://sahrdaya.ac.in/valentine-picks/hand-casting-kit',
+    affiliateUrl: 'https://matchall.app/valentine-picks/hand-casting-kit',
     tag: 'Campus Favorite',
   },
   {
@@ -48,7 +48,7 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     description: 'Warm vintage lens, built-in selfie mirror, and dreamy pastel blush finish.',
     price: '₹4,999',
     imageUrl: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&auto=format&fit=crop&q=80',
-    affiliateUrl: 'https://sahrdaya.ac.in/valentine-picks/instant-camera',
+    affiliateUrl: 'https://matchall.app/valentine-picks/instant-camera',
     tag: 'Romantic Memory Maker',
   },
   {
@@ -57,7 +57,7 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
     description: 'Stainless steel titanium chain with subtle magnetic clasp that snaps when close.',
     price: '₹549',
     imageUrl: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&auto=format&fit=crop&q=80',
-    affiliateUrl: 'https://sahrdaya.ac.in/valentine-picks/magnetic-pendants',
+    affiliateUrl: 'https://matchall.app/valentine-picks/magnetic-pendants',
     tag: 'Subtle & Sweet',
   },
 ];
@@ -65,7 +65,7 @@ export const AFFILIATE_PRODUCTS: AffiliateProduct[] = [
 export const DEMO_USERS: User[] = [
   {
     id: 'user-arjun',
-    email: 'arjun@sahrdaya.ac.in',
+    email: 'arjun@campus.edu',
     profileCompleted: true,
     createdAt: '2026-02-10T10:00:00Z',
     profile: {
@@ -89,7 +89,7 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'user-maya',
-    email: 'maya@sahrdaya.ac.in',
+    email: 'maya@campus.edu',
     profileCompleted: true,
     createdAt: '2026-02-11T11:30:00Z',
     profile: {
@@ -113,7 +113,7 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'user-akhil',
-    email: 'akhil@sahrdaya.ac.in',
+    email: 'akhil@campus.edu',
     profileCompleted: true,
     createdAt: '2026-02-11T12:00:00Z',
     profile: {
@@ -135,7 +135,7 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'user-niya',
-    email: 'niya@sahrdaya.ac.in',
+    email: 'niya@campus.edu',
     profileCompleted: true,
     createdAt: '2026-02-12T09:15:00Z',
     profile: {
@@ -158,7 +158,7 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'user-kevin',
-    email: 'kevin@sahrdaya.ac.in',
+    email: 'kevin@campus.edu',
     profileCompleted: true,
     createdAt: '2026-02-12T14:45:00Z',
     profile: {
@@ -180,7 +180,7 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'user-ananya',
-    email: 'ananya@sahrdaya.ac.in',
+    email: 'ananya@campus.edu',
     profileCompleted: true,
     createdAt: '2026-02-13T08:30:00Z',
     profile: {
@@ -202,7 +202,7 @@ export const DEMO_USERS: User[] = [
   },
   {
     id: 'user-rohan',
-    email: 'rohan@sahrdaya.ac.in',
+    email: 'rohan@campus.edu',
     profileCompleted: true,
     createdAt: '2026-02-13T16:20:00Z',
     profile: {

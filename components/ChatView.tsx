@@ -96,7 +96,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
           No active conversations yet
         </h2>
         <p className="text-xs text-stone-500 max-w-sm mx-auto mb-6 leading-relaxed">
-          Your matches and conversations will appear here once Cupid pairs you with fellow Sahrdaya students.
+          Your matches and conversations will appear here once Cupid pairs you with fellow students.
         </p>
         <button
           onClick={onBackToDashboard}
@@ -294,7 +294,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
               <div className="my-2 text-center">
                 <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-rose-100/70 border border-rose-200/50 text-rose-700 text-[11px] font-semibold shadow-2xs">
                   <Sparkles className="w-3 h-3 text-amber-500" />
-                  <span>Confidential Valentine Match Channel · Sahrdaya Campus</span>
+                  <span>Confidential Valentine Match Channel · MATCH@ALL</span>
                 </div>
               </div>
 

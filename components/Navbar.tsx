@@ -40,7 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-serif text-lg font-bold tracking-tight text-stone-900 group-hover:text-rose-600 transition-colors">
-                MATCH<span className="text-rose-500 font-sans text-sm font-semibold">@SAHRDAYA</span>
+                MATCH<span className="text-rose-500 font-sans text-sm font-semibold">@ALL</span>
               </span>
               <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider uppercase bg-rose-50 text-rose-600 border border-rose-200">
                 <ShinyText text="Valentine '26" speed={3} className="font-bold" />
