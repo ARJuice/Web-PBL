@@ -70,10 +70,14 @@ Thumbs.db
 # Container & Orchestration local overrides
 docker-compose.override.yml
 
-# AI Agent Specific Files & Rubrics (Keep internal to local development)
+# AI Agent Specific Files & Skills (Keep internal to local development)
 SKILL.md
 *.skill.md
-*.pdf
+*.agent.md
+agent*.md
+skills-lock.json
+.agents/
 .agent/
 .gemini/
 scratch/
+*.pdf
