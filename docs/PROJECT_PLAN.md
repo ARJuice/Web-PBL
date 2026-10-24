@@ -107,20 +107,20 @@ gantt
 - [x] Create monitoring, error tracking, and CI/CD guide (`docs/MONITORING_CICD.md`).
 - [x] Overhaul root `README.md` for professional portfolio standards.
 
-#### Phase 2: NestJS Backend & Database Construction (Pending User Approval)
-- [ ] Scaffold NestJS backend in designated directory (`backend/`).
-- [ ] Configure Prisma with PostgreSQL database driver.
-- [ ] Define User, Profile, Interest, Match, Conversation, Message, and Report entities.
-- [ ] Implement database migrations and automated seeding for demo campus users.
-- [ ] Implement JWT authentication module with email domain restriction (`@sahrdaya.ac.in`).
-- [ ] Build GraphQL resolvers for Auth, Users, Matchmaking, and Chat.
+#### Phase 2: NestJS Backend & Database Construction (Completed)
+- [x] Scaffold NestJS backend in designated directory (`backend/`).
+- [x] Configure Prisma with PostgreSQL database driver (connected to Supabase).
+- [x] Define User, Profile, Interest, Match, Conversation, Message, and Report entities.
+- [x] Implement database migrations, best-practice foreign key indexes, and automated seeding.
+- [x] Implement JWT authentication module with email domain restriction (`@sahrdaya.ac.in`).
+- [x] Build GraphQL resolvers for Auth, Users, Matchmaking, Chat, and Safety.
 
-#### Phase 3: Frontend Modernization & API Integration
-- [ ] Replace `lib/storage.ts` localStorage mock state with Apollo Client queries & mutations.
-- [ ] Convert client-side simulated matchmaking to invoke GraphQL mutation `findMatch`.
-- [ ] Convert client-side simulated chat to real-time messaging backed by NestJS GraphQL mutations/subscriptions.
-- [ ] Add loading skeletons, network error handling, and session persistence.
-- [ ] Validate responsive layouts on mobile, tablet, and desktop viewports.
+#### Phase 3: Frontend Modernization & API Integration (Step 4 Completed)
+- [x] Replace `lib/storage.ts` localStorage mock state with Apollo Client queries & mutations.
+- [x] Convert client-side simulated matchmaking to invoke GraphQL mutation `executeMatch`.
+- [x] Convert client-side simulated chat to real-time messaging backed by NestJS GraphQL mutations/queries.
+- [x] Add loading states, network error handling, session persistence, and offline fallback.
+- [x] Validate responsive layouts on mobile, tablet, and desktop viewports.
 
 #### Phase 4: Containerization & Cloud Deployment
 - [ ] Create production-ready, multi-stage `Dockerfile` for Next.js frontend (standalone output).

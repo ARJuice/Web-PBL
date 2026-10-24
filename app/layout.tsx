@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
+import { ApolloWrapper } from '@/components/ApolloWrapper';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -33,7 +34,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className={`${playfair.variable} ${jakarta.variable}`}>
       <body className="font-sans antialiased bg-[#fff8f9] text-[#1c1417] min-h-screen selection:bg-rose-200 selection:text-rose-900" suppressHydrationWarning>
-        {children}
+        <ApolloWrapper>{children}</ApolloWrapper>
       </body>
     </html>
   );

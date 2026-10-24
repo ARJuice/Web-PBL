@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react';
 import { Navbar } from '@/components/Navbar';
 import { LandingView } from '@/components/LandingView';
 import { LoginModal } from '@/components/LoginModal';
@@ -26,6 +27,57 @@ import {
   UserProfile,
 } from '@/types/match';
 
+interface MeData {
+  me: User;
+}
+
+interface MyMatchesData {
+  myMatches: Match[];
+}
+
+interface MyConversationsData {
+  myConversations: Conversation[];
+}
+
+interface MessagesData {
+  messages: Message[];
+}
+
+interface LoginData {
+  login: {
+    accessToken: string;
+    user: User;
+  };
+}
+
+interface UpdateProfileData {
+  updateProfile: User;
+}
+
+interface UpdateInterestsData {
+  updateInterests: User;
+}
+
+interface SetMatchModeData {
+  setMatchMode: User;
+}
+
+interface ExecuteMatchData {
+  executeMatch: Match;
+}
+
+interface SendMessageData {
+  sendMessage: Message;
+}
+
+interface BlockUserData {
+  blockUser: boolean;
+}
+
+interface ReportUserData {
+  reportUser: boolean;
+}
+
 import {
   getCurrentUser,
   getStoredMatches,
@@ -41,7 +93,32 @@ import {
   setCurrentUserId,
 } from '@/lib/storage';
 
+import {
+  LOGIN_MUTATION,
+  ME_QUERY,
+  UPDATE_PROFILE_MUTATION,
+  UPDATE_INTERESTS_MUTATION,
+  SET_MATCH_MODE_MUTATION,
+  EXECUTE_MATCH_MUTATION,
+  MY_MATCHES_QUERY,
+  MY_CONVERSATIONS_QUERY,
+  MESSAGES_QUERY,
+  SEND_MESSAGE_MUTATION,
+  MARK_CONVERSATION_AS_READ_MUTATION,
+  BLOCK_USER_MUTATION,
+  REPORT_USER_MUTATION,
+} from '@/lib/graphql/operations';
+
 export default function HomePage() {
+  const [hasToken, setHasToken] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('match_sahrdaya_token');
+      setHasToken(!!token);
+    }
+  }, []);
+
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     return getCurrentUser();
   });
@@ -89,20 +166,123 @@ export default function HomePage() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // GraphQL Hooks
+  const [loginMutation] = useMutation<LoginData>(LOGIN_MUTATION);
+  const [updateProfileMutation] = useMutation<UpdateProfileData>(UPDATE_PROFILE_MUTATION);
+  const [updateInterestsMutation] = useMutation<UpdateInterestsData>(UPDATE_INTERESTS_MUTATION);
+  const [setMatchModeMutation] = useMutation<SetMatchModeData>(SET_MATCH_MODE_MUTATION);
+  const [executeMatchMutation] = useMutation<ExecuteMatchData>(EXECUTE_MATCH_MUTATION);
+  const [sendMessageMutation] = useMutation<SendMessageData>(SEND_MESSAGE_MUTATION);
+  const [markConversationAsReadMutation] = useMutation<{ markConversationAsRead: boolean }>(MARK_CONVERSATION_AS_READ_MUTATION);
+  const [blockUserMutation] = useMutation<BlockUserData>(BLOCK_USER_MUTATION);
+  const [reportUserMutation] = useMutation<ReportUserData>(REPORT_USER_MUTATION);
+
+  const { data: meData, refetch: refetchMe } = useQuery<MeData>(ME_QUERY, {
+    skip: !hasToken,
+    fetchPolicy: 'network-only',
+  });
+
+  const { data: myMatchesData, refetch: refetchMatches } = useQuery<MyMatchesData>(MY_MATCHES_QUERY, {
+    skip: !currentUser,
+    fetchPolicy: 'network-only',
+  });
+
+  const { data: myConvsData, refetch: refetchConvs } = useQuery<MyConversationsData>(MY_CONVERSATIONS_QUERY, {
+    skip: !currentUser,
+    pollInterval: 10000,
+    fetchPolicy: 'network-only',
+  });
+
+  const [fetchMessages, { data: messagesQueryData }] = useLazyQuery<MessagesData>(MESSAGES_QUERY, {
+    fetchPolicy: 'network-only',
+  });
+
+  // Sync ME_QUERY with state
+  useEffect(() => {
+    if (meData?.me) {
+      setCurrentUser(meData.me);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('match_sahrdaya_current_user_id', meData.me.id);
+      }
+    }
+  }, [meData]);
+
+  // Sync MY_MATCHES_QUERY with state
+  useEffect(() => {
+    if (myMatchesData?.myMatches) {
+      setMatches(myMatchesData.myMatches);
+    }
+  }, [myMatchesData]);
+
+  // Sync MY_CONVERSATIONS_QUERY with state
+  useEffect(() => {
+    if (myConvsData?.myConversations) {
+      setConversations(myConvsData.myConversations);
+    }
+  }, [myConvsData]);
+
+  // Fetch messages when active conversation changes
+  useEffect(() => {
+    if (activeConversationId) {
+      fetchMessages({ variables: { conversationId: activeConversationId } }).catch(() => {});
+      markConversationAsReadMutation({ variables: { conversationId: activeConversationId } }).catch(() => {});
+    }
+  }, [activeConversationId, fetchMessages, markConversationAsReadMutation]);
+
+  // Sync MESSAGES_QUERY with state
+  useEffect(() => {
+    if (messagesQueryData?.messages && activeConversationId) {
+      setMessages((prev) => ({
+        ...prev,
+        [activeConversationId]: messagesQueryData.messages,
+      }));
+    }
+  }, [messagesQueryData, activeConversationId]);
+
   // Login handler
-  const handleLogin = (email: string) => {
+  const handleLogin = async (email: string) => {
+    try {
+      const response = await loginMutation({
+        variables: { input: { email } },
+      });
+
+      if (response.data?.login) {
+        const { accessToken, user } = response.data.login;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('match_sahrdaya_token', accessToken);
+          localStorage.setItem('match_sahrdaya_current_user_id', user.id);
+        }
+        setHasToken(true);
+        setCurrentUser(user);
+        setLoginModalOpen(false);
+
+        await Promise.allSettled([refetchMatches(), refetchConvs()]);
+
+        if (!user.profileCompleted) {
+          setActiveView('onboarding');
+          addToast('info', 'Welcome to Sahrdaya Valentine Matching! Please set up your profile.');
+        } else {
+          setActiveView('dashboard');
+          addToast('cupid', `Welcome back, ${user.profile?.displayName || 'Student'}! (Connected via GraphQL)`);
+        }
+        return;
+      }
+    } catch (graphQLErr) {
+      console.warn('Backend GraphQL login failed, using local persistence fallback:', graphQLErr);
+    }
+
+    // Graceful fallback to storage.ts
     const user = loginWithEmail(email);
     setCurrentUser(user);
     setLoginModalOpen(false);
 
-    // Refresh state for this user
     setMatches(getStoredMatches());
     setConversations(getStoredConversations());
     setMessages(getStoredMessages());
 
     if (!user.profileCompleted) {
       setActiveView('onboarding');
-      addToast('info', 'Welcome to MATCH@ALL Valentine Matching! Please set up your profile.');
+      addToast('info', 'Welcome to Sahrdaya Valentine Matching! Please set up your profile.');
     } else {
       setActiveView('dashboard');
       addToast('cupid', `Welcome back, ${user.profile?.displayName || 'Student'}!`);
@@ -111,6 +291,11 @@ export default function HomePage() {
 
   // Logout
   const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('match_sahrdaya_token');
+      localStorage.removeItem('match_sahrdaya_current_user_id');
+    }
+    setHasToken(false);
     setCurrentUserId(null);
     setCurrentUser(null);
     setSettingsModalOpen(false);
@@ -119,8 +304,37 @@ export default function HomePage() {
   };
 
   // Onboarding Complete
-  const handleOnboardingComplete = (profile: UserProfile) => {
+  const handleOnboardingComplete = async (profile: UserProfile) => {
     if (!currentUser) return;
+
+    try {
+      const response = await updateProfileMutation({
+        variables: {
+          input: {
+            displayName: profile.displayName,
+            year: profile.year,
+            bio: profile.bio || '',
+            gender: profile.gender,
+            showDob: profile.showDob,
+            dateOfBirth: profile.dateOfBirth,
+            intent: profile.intent,
+            matchMode: profile.matchMode,
+            interestIds: profile.interests.map((i) => i.id),
+            avatarUrl: profile.avatarUrl,
+          },
+        },
+      });
+
+      if (response.data?.updateProfile) {
+        setCurrentUser(response.data.updateProfile);
+        setActiveView('dashboard');
+        addToast('cupid', 'Profile created! You can now find your Valentine match.');
+        return;
+      }
+    } catch (err) {
+      console.warn('GraphQL updateProfile failed, falling back to local storage:', err);
+    }
+
     const updatedUser = upsertProfile(currentUser.id, profile);
     setCurrentUser(updatedUser);
     setActiveView('dashboard');
@@ -128,8 +342,29 @@ export default function HomePage() {
   };
 
   // Toggle Matching Mode
-  const handleToggleMatchMode = (newMode: MatchMode) => {
+  const handleToggleMatchMode = async (newMode: MatchMode) => {
     if (!currentUser || !currentUser.profile) return;
+
+    try {
+      const response = await setMatchModeMutation({
+        variables: { mode: newMode },
+      });
+      if (response.data?.setMatchMode) {
+        setCurrentUser((prev) =>
+          prev ? { ...prev, profile: { ...prev.profile!, matchMode: newMode } } : null
+        );
+        addToast(
+          'info',
+          newMode === 'INTERESTS'
+            ? 'Switched to Interest-Based Cupid Matching'
+            : 'Switched to Random Serendipity Match Mode'
+        );
+        return;
+      }
+    } catch (err) {
+      console.warn('GraphQL setMatchMode failed, falling back to local storage:', err);
+    }
+
     const updatedProfile: UserProfile = {
       ...currentUser.profile,
       matchMode: newMode,
@@ -145,8 +380,24 @@ export default function HomePage() {
   };
 
   // Save Interests from Edit Modal
-  const handleSaveInterests = (newInterests: Interest[]) => {
+  const handleSaveInterests = async (newInterests: Interest[]) => {
     if (!currentUser || !currentUser.profile) return;
+
+    try {
+      const response = await updateInterestsMutation({
+        variables: { interestIds: newInterests.map((i) => i.id) },
+      });
+      if (response.data?.updateInterests) {
+        setCurrentUser((prev) =>
+          prev ? { ...prev, profile: { ...prev.profile!, interests: newInterests } } : null
+        );
+        addToast('success', 'Interests updated successfully!');
+        return;
+      }
+    } catch (err) {
+      console.warn('GraphQL updateInterests failed, falling back to local storage:', err);
+    }
+
     const updatedProfile: UserProfile = {
       ...currentUser.profile,
       interests: newInterests,
@@ -157,8 +408,35 @@ export default function HomePage() {
   };
 
   // Save Profile from Settings Modal
-  const handleSaveSettingsProfile = (updatedProfile: UserProfile) => {
+  const handleSaveSettingsProfile = async (updatedProfile: UserProfile) => {
     if (!currentUser) return;
+
+    try {
+      const response = await updateProfileMutation({
+        variables: {
+          input: {
+            displayName: updatedProfile.displayName,
+            year: updatedProfile.year,
+            bio: updatedProfile.bio || '',
+            gender: updatedProfile.gender,
+            showDob: updatedProfile.showDob,
+            dateOfBirth: updatedProfile.dateOfBirth,
+            intent: updatedProfile.intent,
+            matchMode: updatedProfile.matchMode,
+            interestIds: updatedProfile.interests.map((i) => i.id),
+            avatarUrl: updatedProfile.avatarUrl,
+          },
+        },
+      });
+      if (response.data?.updateProfile) {
+        setCurrentUser(response.data.updateProfile);
+        addToast('success', 'Profile settings saved!');
+        return;
+      }
+    } catch (err) {
+      console.warn('GraphQL updateProfile failed, falling back to local storage:', err);
+    }
+
     const updatedUser = upsertProfile(currentUser.id, updatedProfile);
     setCurrentUser(updatedUser);
     addToast('success', 'Profile settings saved!');
@@ -174,16 +452,41 @@ export default function HomePage() {
   };
 
   // When 10-second timer finishes
-  const handleMatchingComplete = () => {
+  const handleMatchingComplete = async () => {
     if (!currentUser) {
       setActiveView('dashboard');
       return;
     }
 
-    const result = executeMatchmaking(currentUser);
+    try {
+      const response = await executeMatchMutation({
+        variables: { overrideMode: currentUser.profile?.matchMode },
+      });
 
+      if (response.data?.executeMatch) {
+        const newMatch: Match = response.data.executeMatch;
+        setCurrentFoundMatch(newMatch);
+        setIsMatchResultOpen(true);
+        setActiveView('dashboard');
+        await Promise.allSettled([refetchMatches(), refetchConvs()]);
+        return;
+      }
+    } catch (err: any) {
+      console.warn('GraphQL executeMatch failed, checking fallback:', err);
+      const graphQLErrorMsg = err?.message;
+      if (graphQLErrorMsg && graphQLErrorMsg.includes('No new eligible matches')) {
+        setActiveView('dashboard');
+        addToast(
+          'error',
+          'No new eligible matches available right now. You have connected with all active candidates!'
+        );
+        return;
+      }
+    }
+
+    // Local storage fallback
+    const result = executeMatchmaking(currentUser);
     if (result) {
-      // Refresh matches and conversations
       const updatedMatches = getStoredMatches();
       const updatedConvs = getStoredConversations();
       const updatedMsgs = getStoredMessages();
@@ -226,22 +529,66 @@ export default function HomePage() {
   };
 
   // Send Message
-  const handleSendMessage = (conversationId: string, content: string) => {
+  const handleSendMessage = async (conversationId: string, content: string) => {
     if (!currentUser) return;
+
+    try {
+      const response = await sendMessageMutation({
+        variables: {
+          input: {
+            conversationId,
+            content,
+          },
+        },
+      });
+
+      if (response.data?.sendMessage) {
+        const newMsg: Message = response.data.sendMessage;
+        setMessages((prev) => ({
+          ...prev,
+          [conversationId]: [...(prev[conversationId] || []), newMsg],
+        }));
+
+        await refetchConvs();
+
+        // Check if other participant should send an interactive reply
+        const conv = conversations.find((c) => c.id === conversationId);
+        if (conv) {
+          setIsPartnerTyping(true);
+          triggerSimulatedMatchReply(
+            conversationId,
+            conv.otherUser.displayName,
+            conv.otherUser.id,
+            (replyMsg) => {
+              setIsPartnerTyping(false);
+              setMessages((prev) => ({
+                ...prev,
+                [conversationId]: [...(prev[conversationId] || []), replyMsg],
+              }));
+              refetchConvs();
+              addToast(
+                'cupid',
+                `New message from ${conv.otherUser.displayName}: "${replyMsg.content.slice(0, 30)}..."`
+              );
+            }
+          );
+        }
+        return;
+      }
+    } catch (err: unknown) {
+      console.warn('GraphQL sendMessage failed, falling back to local:', err);
+    }
 
     try {
       const newMsg = sendMessage(conversationId, currentUser.id, content);
 
-      // Update local message list
       setMessages((prev) => ({
         ...prev,
         [conversationId]: [...(prev[conversationId] || []), newMsg],
       }));
 
-      // Update conversation lastMessage
       setConversations(getStoredConversations());
 
-      // Find other participant for simulated real-time reply
       const conv = conversations.find((c) => c.id === conversationId);
       if (conv) {
         setIsPartnerTyping(true);
@@ -270,22 +617,58 @@ export default function HomePage() {
   };
 
   // Block User Action
-  const handleConfirmBlock = () => {
+  const handleConfirmBlock = async () => {
     if (!blockTarget) return;
-    blockUser(blockTarget.id);
 
-    // Refresh state
+    try {
+      const response = await blockUserMutation({
+        variables: { targetUserId: blockTarget.id },
+      });
+      if (response.data?.blockUser) {
+        await Promise.allSettled([refetchMatches(), refetchConvs()]);
+        addToast('info', `${blockTarget.name} has been blocked.`);
+        setBlockTarget(null);
+        setActiveView('dashboard');
+        return;
+      }
+    } catch (err) {
+      console.warn('GraphQL blockUser failed, falling back to local:', err);
+    }
+
+    blockUser(blockTarget.id);
     setMatches(getStoredMatches());
     setConversations(getStoredConversations());
-
     addToast('info', `${blockTarget.name} has been blocked.`);
     setBlockTarget(null);
     setActiveView('dashboard');
   };
 
   // Report User Action
-  const handleSubmitReport = (reason: ReportReason, note?: string) => {
+  const handleSubmitReport = async (reason: ReportReason, note?: string) => {
     if (!reportTarget || !currentUser) return;
+
+    try {
+      const response = await reportUserMutation({
+        variables: {
+          input: {
+            targetUserId: reportTarget.id,
+            reason,
+            note,
+          },
+        },
+      });
+      if (response.data?.reportUser) {
+        addToast(
+          'info',
+          `Thank you. Your report for ${reportTarget.name} has been submitted to campus moderation.`
+        );
+        setReportTarget(null);
+        return;
+      }
+    } catch (err) {
+      console.warn('GraphQL reportUser failed, falling back to local:', err);
+    }
+
     reportUser({
       targetUserId: reportTarget.id,
       reporterUserId: currentUser.id,

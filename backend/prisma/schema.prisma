@@ -61,6 +61,7 @@ model UserInterest {
   interest   Interest    @relation(fields: [interestId], references: [id], onDelete: Cascade)
 
   @@id([profileId, interestId])
+  @@index([interestId])
   @@map("user_interests")
 }
 
@@ -78,6 +79,7 @@ model Match {
   createdAt      DateTime      @default(now())
 
   @@index([userAId, userBId])
+  @@index([userBId])
   @@map("matches")
 }
 
@@ -107,6 +109,7 @@ model Message {
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt(sort: Desc)])
+  @@index([senderId])
   @@map("messages")
 }
 
@@ -120,6 +123,7 @@ model UserBlock {
   createdAt DateTime @default(now())
 
   @@unique([blockerId, blockedId])
+  @@index([blockedId])
   @@map("user_blocks")
 }
 
@@ -133,5 +137,7 @@ model UserReport {
   note       String?
   createdAt  DateTime @default(now())
 
+  @@index([reporterId])
+  @@index([targetId])
   @@map("user_reports")
 }
