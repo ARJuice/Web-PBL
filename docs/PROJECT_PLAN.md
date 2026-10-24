@@ -122,24 +122,28 @@ gantt
 - [x] Add loading states, network error handling, session persistence, and offline fallback.
 - [x] Validate responsive layouts on mobile, tablet, and desktop viewports.
 
-#### Phase 4: Containerization & Cloud Deployment
-- [ ] Create production-ready, multi-stage `Dockerfile` for Next.js frontend (standalone output).
-- [ ] Create production-ready, multi-stage `Dockerfile` for NestJS backend.
-- [ ] Compose orchestration (`docker-compose.yml`) linking Frontend, Backend, PostgreSQL, and Redis.
-- [ ] Develop Kubernetes manifests:
-  - `k8s/frontend-deployment.yaml` and `k8s/frontend-service.yaml`
-  - `k8s/backend-deployment.yaml` and `k8s/backend-service.yaml`
-  - `k8s/postgres-statefulset.yaml` and `k8s/postgres-pvc.yaml`
-  - `k8s/ingress.yaml`
-- [ ] Validate cluster deployment locally on Minikube with health probes (`livenessProbe` / `readinessProbe`).
+#### Phase 4: Containerization & Cloud Deployment (Step 5 Completed)
+- [x] Create production-ready, multi-stage `Dockerfile` for Next.js frontend (standalone output).
+- [x] Create production-ready, multi-stage `Dockerfile` for NestJS backend.
+- [x] Compose orchestration (`docker-compose.yml`) linking Frontend, Backend, PostgreSQL, and Redis.
+- [x] Develop Kubernetes manifests in `k8s/`:
+  - `k8s/00-namespace.yaml`
+  - `k8s/05-secrets.yaml`
+  - `k8s/06-configmap.yaml`
+  - `k8s/10-postgres.yaml` (StatefulSet, PVC, and Headless Service)
+  - `k8s/15-redis.yaml` (Deployment and Service)
+  - `k8s/20-backend.yaml` (Deployment with health probes and Service)
+  - `k8s/25-frontend.yaml` (Deployment with health probes and Service)
+  - `k8s/30-ingress.yaml` (Nginx Ingress routing / and /graphql)
+- [x] Deployment automation scripts (`k8s/deploy.sh` and `k8s/deploy.ps1`).
 
-#### Phase 5: CI/CD & Observability
-- [ ] Implement GitHub Actions workflow (`.github/workflows/ci.yml`):
+#### Phase 5: CI/CD & Observability (Step 6 Completed)
+- [x] Implement GitHub Actions workflow (`.github/workflows/ci.yml`):
   - Next.js type-check and linting.
   - NestJS compilation, unit tests, and e2e tests.
   - Docker container build verification.
-- [ ] Configure Sentry for Next.js and NestJS error tracking.
-- [ ] Configure Prometheus metrics exporter in NestJS and Grafana dashboard manifests.
+- [x] Configure Sentry for Next.js and NestJS error tracking (`sentry.client.config.ts`, `sentry.server.config.ts`, `SentryExceptionFilter`).
+- [x] Configure Prometheus metrics exporter in NestJS (`/metrics` via `prom-client`), `prometheus.yml`, and Grafana service in `docker-compose.yml`.
 
 #### Phase 6: Final Evaluation & Demonstration
 - [ ] Prepare comprehensive demonstration script showing the full user journey:

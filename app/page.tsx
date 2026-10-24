@@ -110,14 +110,12 @@ import {
 } from '@/lib/graphql/operations';
 
 export default function HomePage() {
-  const [hasToken, setHasToken] = useState(false);
-
-  useEffect(() => {
+  const [hasToken, setHasToken] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('match_sahrdaya_token');
-      setHasToken(!!token);
+      return !!localStorage.getItem('match_sahrdaya_token');
     }
-  }, []);
+    return false;
+  });
 
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     return getCurrentUser();
@@ -177,18 +175,18 @@ export default function HomePage() {
   const [blockUserMutation] = useMutation<BlockUserData>(BLOCK_USER_MUTATION);
   const [reportUserMutation] = useMutation<ReportUserData>(REPORT_USER_MUTATION);
 
-  const { data: meData, refetch: refetchMe } = useQuery<MeData>(ME_QUERY, {
+  const { data: meData } = useQuery<MeData>(ME_QUERY, {
     skip: !hasToken,
     fetchPolicy: 'network-only',
   });
 
   const { data: myMatchesData, refetch: refetchMatches } = useQuery<MyMatchesData>(MY_MATCHES_QUERY, {
-    skip: !currentUser,
+    skip: !currentUser && !hasToken,
     fetchPolicy: 'network-only',
   });
 
   const { data: myConvsData, refetch: refetchConvs } = useQuery<MyConversationsData>(MY_CONVERSATIONS_QUERY, {
-    skip: !currentUser,
+    skip: !currentUser && !hasToken,
     pollInterval: 10000,
     fetchPolicy: 'network-only',
   });
@@ -197,47 +195,20 @@ export default function HomePage() {
     fetchPolicy: 'network-only',
   });
 
-  // Sync ME_QUERY with state
-  useEffect(() => {
-    if (meData?.me) {
-      setCurrentUser(meData.me);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('match_sahrdaya_current_user_id', meData.me.id);
-      }
-    }
-  }, [meData]);
+  // Derived state combining GraphQL data and local fallbacks
+  const activeUser = meData?.me || currentUser;
+  const activeMatches = myMatchesData?.myMatches || matches;
+  const activeConversations = myConvsData?.myConversations || conversations;
+  const activeMessages =
+    messagesQueryData?.messages && activeConversationId
+      ? { ...messages, [activeConversationId]: messagesQueryData.messages }
+      : messages;
 
-  // Sync MY_MATCHES_QUERY with state
-  useEffect(() => {
-    if (myMatchesData?.myMatches) {
-      setMatches(myMatchesData.myMatches);
-    }
-  }, [myMatchesData]);
-
-  // Sync MY_CONVERSATIONS_QUERY with state
-  useEffect(() => {
-    if (myConvsData?.myConversations) {
-      setConversations(myConvsData.myConversations);
-    }
-  }, [myConvsData]);
-
-  // Fetch messages when active conversation changes
-  useEffect(() => {
-    if (activeConversationId) {
-      fetchMessages({ variables: { conversationId: activeConversationId } }).catch(() => {});
-      markConversationAsReadMutation({ variables: { conversationId: activeConversationId } }).catch(() => {});
-    }
-  }, [activeConversationId, fetchMessages, markConversationAsReadMutation]);
-
-  // Sync MESSAGES_QUERY with state
-  useEffect(() => {
-    if (messagesQueryData?.messages && activeConversationId) {
-      setMessages((prev) => ({
-        ...prev,
-        [activeConversationId]: messagesQueryData.messages,
-      }));
-    }
-  }, [messagesQueryData, activeConversationId]);
+  const handleSelectConversation = useCallback((id: string) => {
+    setActiveConversationId(id);
+    fetchMessages({ variables: { conversationId: id } }).catch(() => {});
+    markConversationAsReadMutation({ variables: { conversationId: id } }).catch(() => {});
+  }, [fetchMessages, markConversationAsReadMutation]);
 
   // Login handler
   const handleLogin = async (email: string) => {
@@ -683,7 +654,7 @@ export default function HomePage() {
   };
 
   // Calculate unread total
-  const unreadTotal = conversations.reduce(
+  const unreadTotal = activeConversations.reduce(
     (acc, curr) => acc + (curr.unreadCount || 0),
     0
   );
@@ -695,11 +666,11 @@ export default function HomePage() {
 
       {/* Top Navigation */}
       <Navbar
-        currentUser={currentUser}
+        currentUser={activeUser}
         activeView={activeView}
         unreadTotal={unreadTotal}
         onNavigate={(view) => {
-          if (!currentUser && view !== 'landing') {
+          if (!activeUser && view !== 'landing') {
             setLoginModalOpen(true);
             return;
           }
@@ -715,9 +686,9 @@ export default function HomePage() {
         {activeView === 'landing' && (
           <LandingView
             onStart={() => {
-              if (currentUser) {
+              if (activeUser) {
                 setActiveView(
-                  currentUser.profileCompleted ? 'dashboard' : 'onboarding'
+                  activeUser.profileCompleted ? 'dashboard' : 'onboarding'
                 );
               } else {
                 setLoginModalOpen(true);
@@ -726,18 +697,18 @@ export default function HomePage() {
           />
         )}
 
-        {activeView === 'onboarding' && currentUser && (
+        {activeView === 'onboarding' && activeUser && (
           <OnboardingView
-            currentUser={currentUser}
+            currentUser={activeUser}
             onComplete={handleOnboardingComplete}
           />
         )}
 
-        {activeView === 'dashboard' && currentUser && (
+        {activeView === 'dashboard' && activeUser && (
           <DashboardView
-            currentUser={currentUser}
-            matches={matches}
-            conversations={conversations}
+            currentUser={activeUser}
+            matches={activeMatches}
+            conversations={activeConversations}
             onFindMatch={handleStartMatching}
             onToggleMatchMode={handleToggleMatchMode}
             onOpenEditInterests={() => setEditInterestsModalOpen(true)}
@@ -750,17 +721,17 @@ export default function HomePage() {
           <MatchingScreen
             onComplete={handleMatchingComplete}
             onCopyProductLink={handleCopyProductLink}
-            matchMode={currentUser?.profile?.matchMode}
+            matchMode={activeUser?.profile?.matchMode}
           />
         )}
 
-        {activeView === 'chat' && currentUser && (
+        {activeView === 'chat' && activeUser && (
           <ChatView
-            currentUser={currentUser}
-            conversations={conversations}
+            currentUser={activeUser}
+            conversations={activeConversations}
             activeConversationId={activeConversationId}
-            messages={messages}
-            onSelectConversation={setActiveConversationId}
+            messages={activeMessages}
+            onSelectConversation={handleSelectConversation}
             onSendMessage={handleSendMessage}
             onOpenBlock={(name, id) => setBlockTarget({ name, id })}
             onOpenReport={(name, id) => setReportTarget({ name, id })}
@@ -786,20 +757,20 @@ export default function HomePage() {
       />
 
       {/* Quick Edit Interests Modal */}
-      {currentUser?.profile && (
+      {activeUser?.profile && (
         <EditInterestsModal
           isOpen={editInterestsModalOpen}
-          currentInterests={currentUser.profile.interests}
+          currentInterests={activeUser.profile.interests}
           onClose={() => setEditInterestsModalOpen(false)}
           onSave={handleSaveInterests}
         />
       )}
 
       {/* Settings / Profile Edit Modal */}
-      {currentUser && (
+      {activeUser && (
         <SettingsModal
           isOpen={settingsModalOpen}
-          currentUser={currentUser}
+          currentUser={activeUser}
           onClose={() => setSettingsModalOpen(false)}
           onSaveProfile={handleSaveSettingsProfile}
           onLogout={handleLogout}

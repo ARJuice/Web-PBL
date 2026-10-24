@@ -9,6 +9,7 @@ import { UserModule } from './modules/user/user.module';
 import { MatchModule } from './modules/match/match.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { SafetyModule } from './modules/safety/safety.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SafetyModule } from './modules/safety/safety.module';
     MatchModule,
     ChatModule,
     SafetyModule,
+    MetricsModule,
   ],
 })
 export class AppModule {}

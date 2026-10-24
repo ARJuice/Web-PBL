@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: match-config
+  namespace: match-sahrdaya
+data:
+  NODE_ENV: "production"
+  PORT: "4000"
+  DATABASE_HOST: "postgres-service"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "match_sahrdaya"
+  DATABASE_USER: "postgres"
+  REDIS_URL: "redis://redis-service:6379"
+  CORS_ORIGIN: "http://match.sahrdaya.local"
+  NEXT_PUBLIC_APP_URL: "http://match.sahrdaya.local"
+  NEXT_PUBLIC_GRAPHQL_ENDPOINT: "http://match.sahrdaya.local/graphql"

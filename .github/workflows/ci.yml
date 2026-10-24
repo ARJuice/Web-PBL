@@ -1,0 +1,130 @@
+name: MATCH@SAHRDAYA CI Pipeline
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Job 1: Code Quality & Type Integrity
+  # ----------------------------------------------------------------------------
+  code-quality:
+    name: Code Quality & Type Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Install Backend Dependencies
+        run: npm ci --prefix backend
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Verify Frontend TypeScript
+        run: npm run type-check
+
+      - name: Verify Backend TypeScript
+        run: npm run type-check --prefix backend
+
+  # ----------------------------------------------------------------------------
+  # Job 2: Automated Testing
+  # ----------------------------------------------------------------------------
+  unit-tests:
+    name: Automated Unit & Service Tests
+    needs: code-quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          npm ci --prefix backend
+
+      - name: Run Backend Auth & Domain Unit Tests
+        run: npm test --prefix backend
+
+      - name: Run Backend Core Services Integration Tests
+        run: cd backend && npx ts-node test/step3-services.spec.ts
+
+  # ----------------------------------------------------------------------------
+  # Job 3: Production Build Verification
+  # ----------------------------------------------------------------------------
+  build-production:
+    name: Production Build Verification
+    needs: code-quality
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      NODE_ENV: production
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          npm ci --prefix backend
+
+      - name: Build Next.js Frontend
+        run: npm run build
+
+      - name: Build NestJS Backend
+        run: npm run build --prefix backend
+
+  # ----------------------------------------------------------------------------
+  # Job 4: Container Build Verification
+  # ----------------------------------------------------------------------------
+  docker-build:
+    name: Docker Containerization Build Check
+    needs: [build-production, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Next.js Frontend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: match-sahrdaya-frontend:ci-test
+
+      - name: Build NestJS Backend Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: false
+          tags: match-sahrdaya-backend:ci-test
